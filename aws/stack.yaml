@@ -1,0 +1,106 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Creates AWS stack for Madkomat500Plus'
+
+Parameters:
+  SNSTopicName:
+    Type: String
+
+Resources:
+  RecognitionLambda:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Handler: "index.lambda_handler"
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Runtime: "python3.7"
+      Timeout: 60
+      Code:
+        ZipFile: |
+          import json
+          import urllib
+
+          import boto3
+
+          rekognition = boto3.client('rekognition')
+
+
+          def detect_faces(bucket, key):
+              return rekognition.detect_faces(Image={"S3Object": {"Bucket": bucket, "Name": key}}, Attributes=["ALL"])
+
+
+          def lambda_handler(event, context):
+              bucket = event['Records'][0]['s3']['bucket']['name']
+              key = urllib.parse.quote_plus(event['Records'][0]['s3']['object']['key'].encode('utf8'))
+
+              try:
+                  print(str(key))
+                  response = detect_faces(bucket, key)
+                  print(response)
+                  return response
+              except Exception as e:
+                  return json.dumps(
+                      {
+                          "Error": str(e)
+                      }
+                  )
+
+  LambdaExecutionRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "lambda.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Policies:
+        - PolicyName: "recognition-s3"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action: "s3:GetObject"
+                Resource: "*"
+              - Effect: "Allow"
+                Action:
+                  - "logs:CreateLogGroup"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource: "*"
+              - Effect: "Allow"
+                Action:
+                  - "rekognition:CreateCollection"
+                  - "rekognition:IndexFaces"
+                  - "rekognition:CompareFaces"
+                  - "rekognition:DetectFaces"
+                  - "rekognition:DetectLabels"
+                Resource: "*"
+
+  S3Bucket:
+    Type: "AWS::S3::Bucket"
+    DependsOn:
+      - S3BucketPermission
+    Properties:
+      BucketName: !Sub "madkomat-images-${AWS::AccountId}"
+      NotificationConfiguration:
+        LambdaConfigurations:
+          - Event: "s3:ObjectCreated:*"
+            Filter:
+              S3Key:
+                Rules:
+                  - Name: "prefix"
+                    Value: "*.jpg"
+            Function: !GetAtt RecognitionLambda.Arn
+
+  S3BucketPermission:
+    Type: AWS::Lambda::Permission
+    DependsOn:
+      - RecognitionLambda
+    Properties:
+      Action: 'lambda:InvokeFunction'
+      FunctionName: !Ref RecognitionLambda
+      Principal: "s3.amazonaws.com"
+      SourceAccount: !Ref "AWS::AccountId"
+      SourceArn: !Sub "arn:aws:s3:::madkomat-images-${AWS::AccountId}"
