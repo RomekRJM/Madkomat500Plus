@@ -6,6 +6,37 @@ Parameters:
     Type: String
 
 Resources:
+  S3Bucket:
+    Type: "AWS::S3::Bucket"
+    DependsOn:
+      - S3BucketPermission
+    Properties:
+      BucketName: !Sub "madkomat-images-${AWS::AccountId}"
+      NotificationConfiguration:
+        LambdaConfigurations:
+          - Event: "s3:ObjectCreated:*"
+            Filter:
+              S3Key:
+                Rules:
+                  - Name: "suffix"
+                    Value: ".jpg"
+            Function: !GetAtt RecognitionLambda.Arn
+
+  S3BucketPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: 'lambda:InvokeFunction'
+      FunctionName: !Ref RecognitionLambda
+      Principal: "s3.amazonaws.com"
+      SourceAccount: !Ref "AWS::AccountId"
+      SourceArn: !Sub "arn:aws:s3:::madkomat-images-${AWS::AccountId}"
+
+  SnsTopic:
+    Type: "AWS::SNS::Topic"
+    Properties:
+      TopicName: !Ref SNSTopicName
+      DisplayName: "To notify madkomat Android app."
+
   RecognitionLambda:
     Type: "AWS::Lambda::Function"
     Properties:
@@ -13,18 +44,28 @@ Resources:
       Role: !GetAtt LambdaExecutionRole.Arn
       Runtime: "python3.7"
       Timeout: 60
+      MemorySize: 128
+      Environment:
+        Variables:
+          SNS_TOPIC: !Ref SnsTopic
       Code:
         ZipFile: |
           import json
           import urllib
+          import os
 
           import boto3
 
           rekognition = boto3.client('rekognition')
+          sns = boto3.client('sns')
 
 
           def detect_faces(bucket, key):
               return rekognition.detect_faces(Image={"S3Object": {"Bucket": bucket, "Name": key}}, Attributes=["ALL"])
+
+
+          def publish(message):
+              sns.publish(TopicArn=os.getenv('SNS_TOPIC'), Message=json.dumps(message))
 
 
           def lambda_handler(event, context):
@@ -35,9 +76,9 @@ Resources:
                   print(str(key))
                   response = detect_faces(bucket, key)
                   print(response)
-                  return response
+                  send_notification(response)
               except Exception as e:
-                  return json.dumps(
+                  return publish(
                       {
                           "Error": str(e)
                       }
@@ -56,7 +97,7 @@ Resources:
             Action:
               - "sts:AssumeRole"
       Policies:
-        - PolicyName: "recognition-s3"
+        - PolicyName: "recognition-s3-sns"
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
@@ -77,30 +118,7 @@ Resources:
                   - "rekognition:DetectFaces"
                   - "rekognition:DetectLabels"
                 Resource: "*"
-
-  S3Bucket:
-    Type: "AWS::S3::Bucket"
-    DependsOn:
-      - S3BucketPermission
-    Properties:
-      BucketName: !Sub "madkomat-images-${AWS::AccountId}"
-      NotificationConfiguration:
-        LambdaConfigurations:
-          - Event: "s3:ObjectCreated:*"
-            Filter:
-              S3Key:
-                Rules:
-                  - Name: "prefix"
-                    Value: "*.jpg"
-            Function: !GetAtt RecognitionLambda.Arn
-
-  S3BucketPermission:
-    Type: AWS::Lambda::Permission
-    DependsOn:
-      - RecognitionLambda
-    Properties:
-      Action: 'lambda:InvokeFunction'
-      FunctionName: !Ref RecognitionLambda
-      Principal: "s3.amazonaws.com"
-      SourceAccount: !Ref "AWS::AccountId"
-      SourceArn: !Sub "arn:aws:s3:::madkomat-images-${AWS::AccountId}"
+              - Effect: "Allow"
+                Action:
+                  - "sns:Publish"
+                Resource: !Ref SnsTopic
