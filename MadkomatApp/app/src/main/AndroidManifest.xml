@@ -5,11 +5,10 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
     <uses-feature
         android:name="android.hardware.camera"
-        android:required="false" />
+        android:required="true" />
 
     <application
         android:allowBackup="true"
@@ -28,6 +27,7 @@
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.provider"
+            android:enabled="true"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data

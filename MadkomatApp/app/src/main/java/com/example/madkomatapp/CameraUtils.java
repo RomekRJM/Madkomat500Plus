@@ -23,7 +23,7 @@ import java.util.Locale;
 public class CameraUtils {
 
     /**
-     * Refreshes gallery on adding new image/video. Gallery won't be refreshed
+     * Refreshes gallery on adding new image. Gallery won't be refreshed
      * on older devices until device is rebooted
      */
     public static void refreshGallery(Context context, String filePath) {
@@ -39,7 +39,7 @@ public class CameraUtils {
     public static boolean checkPermissions(Context context) {
         return ActivityCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED;
+                && ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
     }
 
     /**
@@ -87,14 +87,13 @@ public class CameraUtils {
     }
 
     /**
-     * Creates and returns the image or video file before opening the camera
+     * Creates and returns the image file before opening the camera
      */
-    public static File getOutputMediaFile(int type) {
+    public static File getOutputMediaFile(Context context) {
 
         // External sdcard location
         File mediaStorageDir = new File(
-                Environment
-                        .getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
+                context.getExternalFilesDir(Environment.DIRECTORY_PICTURES),
                 MainActivity.GALLERY_DIRECTORY_NAME);
 
         // Create the storage directory if it does not exist
@@ -110,18 +109,9 @@ public class CameraUtils {
         // adds timestamp
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss",
                 Locale.getDefault()).format(new Date());
-        File mediaFile;
-        if (type == MainActivity.MEDIA_TYPE_IMAGE) {
-            mediaFile = new File(mediaStorageDir.getPath() + File.separator
-                    + "IMG_" + timeStamp + "." + MainActivity.IMAGE_EXTENSION);
-        } else if (type == MainActivity.MEDIA_TYPE_VIDEO) {
-            mediaFile = new File(mediaStorageDir.getPath() + File.separator
-                    + "VID_" + timeStamp + "." + MainActivity.VIDEO_EXTENSION);
-        } else {
-            return null;
-        }
 
-        return mediaFile;
+        return new File(mediaStorageDir.getPath() + File.separator
+                + "IMG_" + timeStamp + "." + MainActivity.IMAGE_EXTENSION);
     }
 
 }

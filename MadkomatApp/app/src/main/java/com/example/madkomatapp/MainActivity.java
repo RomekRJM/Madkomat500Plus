@@ -13,7 +13,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.VideoView;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -32,30 +31,26 @@ public class MainActivity extends AppCompatActivity {
 
     // Activity request codes
     private static final int CAMERA_CAPTURE_IMAGE_REQUEST_CODE = 100;
-    private static final int CAMERA_CAPTURE_VIDEO_REQUEST_CODE = 200;
 
     // key to store image path in savedInstance state
     public static final String KEY_IMAGE_STORAGE_PATH = "image_path";
 
     public static final int MEDIA_TYPE_IMAGE = 1;
-    public static final int MEDIA_TYPE_VIDEO = 2;
 
     // Bitmap sampling size
     public static final int BITMAP_SAMPLE_SIZE = 8;
 
-    // Gallery directory name to store the images or videos
+    // Gallery directory name to store the images
     public static final String GALLERY_DIRECTORY_NAME = "madkomat";
 
-    // Image and Video file extensions
+    // Image file extension
     public static final String IMAGE_EXTENSION = "jpg";
-    public static final String VIDEO_EXTENSION = "mp4";
 
     private static String imageStoragePath;
 
     private TextView txtDescription;
     private ImageView imgPreview;
-    private VideoView videoPreview;
-    private Button btnCapturePicture, btnRecordVideo;
+    private Button btnCapturePicture;
 
 
     @Override
@@ -76,9 +71,7 @@ public class MainActivity extends AppCompatActivity {
 
         txtDescription = findViewById(R.id.txt_desc);
         imgPreview = findViewById(R.id.imgPreview);
-        videoPreview = findViewById(R.id.videoPreview);
         btnCapturePicture = findViewById(R.id.btnCapturePicture);
-        btnRecordVideo = findViewById(R.id.btnRecordVideo);
 
         /**
          * Capture image on button click
@@ -91,21 +84,6 @@ public class MainActivity extends AppCompatActivity {
                     captureImage();
                 } else {
                     requestCameraPermission(MEDIA_TYPE_IMAGE);
-                }
-            }
-        });
-
-        /**
-         * Record video on button click
-         */
-        btnRecordVideo.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                if (CameraUtils.checkPermissions(getApplicationContext())) {
-                    captureVideo();
-                } else {
-                    requestCameraPermission(MEDIA_TYPE_VIDEO);
                 }
             }
         });
@@ -125,8 +103,6 @@ public class MainActivity extends AppCompatActivity {
                 if (!TextUtils.isEmpty(imageStoragePath)) {
                     if (imageStoragePath.substring(imageStoragePath.lastIndexOf(".")).equals("." + IMAGE_EXTENSION)) {
                         previewCapturedImage();
-                    } else if (imageStoragePath.substring(imageStoragePath.lastIndexOf(".")).equals("." + VIDEO_EXTENSION)) {
-                        previewVideo();
                     }
                 }
             }
@@ -139,19 +115,12 @@ public class MainActivity extends AppCompatActivity {
     private void requestCameraPermission(final int type) {
         Dexter.withActivity(this)
                 .withPermissions(Manifest.permission.CAMERA,
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                        Manifest.permission.RECORD_AUDIO)
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 .withListener(new MultiplePermissionsListener() {
                     @Override
                     public void onPermissionsChecked(MultiplePermissionsReport report) {
                         if (report.areAllPermissionsGranted()) {
-
-                            if (type == MEDIA_TYPE_IMAGE) {
-                                // capture picture
-                                captureImage();
-                            } else {
-                                captureVideo();
-                            }
+                            captureImage();
 
                         } else if (report.isAnyPermissionPermanentlyDenied()) {
                             showPermissionsAlert();
@@ -172,7 +141,7 @@ public class MainActivity extends AppCompatActivity {
     private void captureImage() {
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
-        File file = CameraUtils.getOutputMediaFile(MEDIA_TYPE_IMAGE);
+        File file = CameraUtils.getOutputMediaFile(getApplicationContext());
         if (file != null) {
             imageStoragePath = file.getAbsolutePath();
         }
@@ -209,28 +178,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Launching camera app to record video
-     */
-    private void captureVideo() {
-        Intent intent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
-
-        File file = CameraUtils.getOutputMediaFile(MEDIA_TYPE_VIDEO);
-        if (file != null) {
-            imageStoragePath = file.getAbsolutePath();
-        }
-
-        Uri fileUri = CameraUtils.getOutputMediaFileUri(getApplicationContext(), file);
-
-        // set video quality
-        intent.putExtra(MediaStore.EXTRA_VIDEO_QUALITY, 1);
-
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri); // set the image file
-
-        // start the video capture Intent
-        startActivityForResult(intent, CAMERA_CAPTURE_VIDEO_REQUEST_CODE);
-    }
-
-    /**
      * Activity result method will be called after closing the camera
      */
     @Override
@@ -255,25 +202,6 @@ public class MainActivity extends AppCompatActivity {
                         "Sorry! Failed to capture image", Toast.LENGTH_SHORT)
                         .show();
             }
-        } else if (requestCode == CAMERA_CAPTURE_VIDEO_REQUEST_CODE) {
-            if (resultCode == RESULT_OK) {
-                // Refreshing the gallery
-                CameraUtils.refreshGallery(getApplicationContext(), imageStoragePath);
-
-                // video successfully recorded
-                // preview the recorded video
-                previewVideo();
-            } else if (resultCode == RESULT_CANCELED) {
-                // user cancelled recording
-                Toast.makeText(getApplicationContext(),
-                        "User cancelled video recording", Toast.LENGTH_SHORT)
-                        .show();
-            } else {
-                // failed to record video
-                Toast.makeText(getApplicationContext(),
-                        "Sorry! Failed to record video", Toast.LENGTH_SHORT)
-                        .show();
-            }
         }
     }
 
@@ -282,9 +210,7 @@ public class MainActivity extends AppCompatActivity {
      */
     private void previewCapturedImage() {
         try {
-            // hide video preview
             txtDescription.setVisibility(View.GONE);
-            videoPreview.setVisibility(View.GONE);
 
             imgPreview.setVisibility(View.VISIBLE);
 
@@ -293,24 +219,6 @@ public class MainActivity extends AppCompatActivity {
             imgPreview.setImageBitmap(bitmap);
 
         } catch (NullPointerException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Displaying video in VideoView
-     */
-    private void previewVideo() {
-        try {
-            // hide image preview
-            txtDescription.setVisibility(View.GONE);
-            imgPreview.setVisibility(View.GONE);
-
-            videoPreview.setVisibility(View.VISIBLE);
-            videoPreview.setVideoPath(imageStoragePath);
-            // start playing
-            videoPreview.start();
-        } catch (Exception e) {
             e.printStackTrace();
         }
     }
