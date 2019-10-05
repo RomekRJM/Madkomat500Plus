@@ -10,8 +10,9 @@ Resources:
     Type: "AWS::S3::Bucket"
     DependsOn:
       - S3BucketPermission
+    DeletionPolicy: Delete
     Properties:
-      BucketName: !Sub "madkomat-images-${AWS::AccountId}"
+      BucketName: !Sub "madkomat-${AWS::AccountId}"
       NotificationConfiguration:
         LambdaConfigurations:
           - Event: "s3:ObjectCreated:*"
@@ -29,13 +30,7 @@ Resources:
       FunctionName: !Ref RecognitionLambda
       Principal: "s3.amazonaws.com"
       SourceAccount: !Ref "AWS::AccountId"
-      SourceArn: !Sub "arn:aws:s3:::madkomat-images-${AWS::AccountId}"
-
-  SnsTopic:
-    Type: "AWS::SNS::Topic"
-    Properties:
-      TopicName: !Ref SNSTopicName
-      DisplayName: "To notify madkomat Android app."
+      SourceArn: !Sub "arn:aws:s3:::madkomat-${AWS::AccountId}"
 
   RecognitionLambda:
     Type: "AWS::Lambda::Function"
@@ -47,7 +42,8 @@ Resources:
       MemorySize: 128
       Environment:
         Variables:
-          SNS_TOPIC: !Ref SnsTopic
+          OUTPUT_BUCKET: !Sub "madkomat-${AWS::AccountId}"
+          OUTPUT_KEY_PREFIX: recognition
       Code:
         ZipFile: |
           import json
@@ -55,34 +51,45 @@ Resources:
           import os
 
           import boto3
+          from botocore.exceptions import ClientError
 
           rekognition = boto3.client('rekognition')
-          sns = boto3.client('sns')
+          s3 = boto3.client('s3')
 
 
           def detect_faces(bucket, key):
               return rekognition.detect_faces(Image={"S3Object": {"Bucket": bucket, "Name": key}}, Attributes=["ALL"])
 
 
-          def publish(message):
-              sns.publish(TopicArn=os.getenv('SNS_TOPIC'), Message=json.dumps(message))
+          def publish(output_key, message):
+              s3.put_object(Bucket=os.getenv('OUTPUT_BUCKET'), Body=json.dumps(message), Key=output_key)
+
+
+          def parse_event(event):
+              s3_record = event['Records'][0]['s3']
+              bucket = s3_record['bucket']['name']
+              key = urllib.parse.quote_plus(s3_record['object']['key'].encode('utf8'))
+              output_key = key.replace(".jpg", ".json")
+
+              return bucket, key, output_key
 
 
           def lambda_handler(event, context):
-              bucket = event['Records'][0]['s3']['bucket']['name']
-              key = urllib.parse.quote_plus(event['Records'][0]['s3']['object']['key'].encode('utf8'))
+              bucket, key, output_key = parse_event(event)
 
               try:
-                  print(str(key))
+                  print("Detecting faces on {}".format(str(key)))
+
                   response = detect_faces(bucket, key)
-                  print(response)
-                  send_notification(response)
-              except Exception as e:
-                  return publish(
-                      {
-                          "Error": str(e)
-                      }
-                  )
+
+                  print("Detection result: {}".format(response))
+                  print("Publishing result to S3: {}/{}".format(bucket, output_key))
+
+                  publish(output_key, { "Response": response, "Error": None })
+
+              except ClientError as e:
+                  print(str(e))
+                  return publish(output_key, { "Response": {}, "Error": str(e) })
 
   LambdaExecutionRole:
     Type: "AWS::IAM::Role"
@@ -97,13 +104,15 @@ Resources:
             Action:
               - "sts:AssumeRole"
       Policies:
-        - PolicyName: "recognition-s3-sns"
+        - PolicyName: "recognition-s3"
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
               - Effect: "Allow"
-                Action: "s3:GetObject"
-                Resource: "*"
+                Action:
+                  - "s3:GetObject"
+                  - "s3:PutObject"
+                Resource: !Sub "arn:aws:s3:::madkomat-${AWS::AccountId}/*"
               - Effect: "Allow"
                 Action:
                   - "logs:CreateLogGroup"
@@ -118,7 +127,3 @@ Resources:
                   - "rekognition:DetectFaces"
                   - "rekognition:DetectLabels"
                 Resource: "*"
-              - Effect: "Allow"
-                Action:
-                  - "sns:Publish"
-                Resource: !Ref SnsTopic
