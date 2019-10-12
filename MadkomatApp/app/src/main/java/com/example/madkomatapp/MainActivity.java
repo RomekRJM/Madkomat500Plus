@@ -4,6 +4,9 @@ import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -18,6 +21,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import com.amazonaws.mobile.client.AWSMobileClient;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
 import com.karumi.dexter.PermissionToken;
@@ -88,9 +92,10 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // restoring storage image path from saved instance state
-        // otherwise the path will be null on device rotation
         restoreFromBundle(savedInstanceState);
+
+        AWSMobileClient.getInstance().initialize(this).execute();
+
     }
 
     /**
@@ -182,15 +187,17 @@ public class MainActivity extends AppCompatActivity {
      */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        // if the result is capturing Image
+        super.onActivityResult(requestCode, resultCode, data);
+
         if (requestCode == CAMERA_CAPTURE_IMAGE_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
                 // Refreshing the gallery
                 CameraUtils.refreshGallery(getApplicationContext(), imageStoragePath);
 
-                // successfully captured the image
-                // display it in image view
                 previewCapturedImage();
+
+                AwsUtils.uploadToS3(getApplicationContext(), new File(imageStoragePath));
+
             } else if (resultCode == RESULT_CANCELED) {
                 // user cancelled Image capture
                 Toast.makeText(getApplicationContext(),
@@ -215,12 +222,22 @@ public class MainActivity extends AppCompatActivity {
             imgPreview.setVisibility(View.VISIBLE);
 
             Bitmap bitmap = CameraUtils.optimizeBitmap(BITMAP_SAMPLE_SIZE, imageStoragePath);
+            drawRectOnTop(bitmap, 0f, 0.7f, 0.5f, 0.2f);
 
             imgPreview.setImageBitmap(bitmap);
 
         } catch (NullPointerException e) {
             e.printStackTrace();
         }
+    }
+
+    private Bitmap drawRectOnTop(Bitmap bitmap, float x, float y, float width, float height) {
+        Canvas canvas = new Canvas(bitmap);
+        Paint paint = new Paint();
+        paint.setColor(Color.argb(128, 255, 0, 0));
+
+        canvas.drawRect(x, y, x + width, y + height, paint);
+        return bitmap;
     }
 
     /**
