@@ -236,7 +236,12 @@ public class MainActivity extends AppCompatActivity {
         Paint paint = new Paint();
         paint.setColor(Color.argb(128, 255, 0, 0));
 
-        canvas.drawRect(x, y, x + width, y + height, paint);
+        float rectX = x * bitmap.getWidth();
+        float rectY = y * bitmap.getHeight();
+        float rectWidth = width * bitmap.getWidth();
+        float rectHeight = height * bitmap.getHeight();
+
+        canvas.drawRect(rectX, rectY, rectX + rectWidth, rectY + rectHeight, paint);
         return bitmap;
     }
 

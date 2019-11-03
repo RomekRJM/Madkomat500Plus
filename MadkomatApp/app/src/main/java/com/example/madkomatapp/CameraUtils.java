@@ -43,14 +43,11 @@ public class CameraUtils {
     }
 
     /**
-     * Downsizing the bitmap to avoid OutOfMemory exceptions
+     * Downsizing the bitmap and making it mutable to avoid OutOfMemory exceptions
      */
     public static Bitmap optimizeBitmap(int sampleSize, String filePath) {
-        // bitmap factory
         BitmapFactory.Options options = new BitmapFactory.Options();
-
-        // downsizing image as it throws OutOfMemory Exception for larger
-        // images
+        options.inMutable = true;
         options.inSampleSize = sampleSize;
 
         return BitmapFactory.decodeFile(filePath, options);
