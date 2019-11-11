@@ -11,7 +11,6 @@ import com.amazonaws.mobile.config.AWSConfiguration;
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferListener;
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferNetworkLossHandler;
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferObserver;
-import com.amazonaws.mobileconnectors.s3.transferutility.TransferState;
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferUtility;
 import com.amazonaws.regions.Region;
 import com.amazonaws.services.s3.AmazonS3Client;
@@ -29,44 +28,35 @@ public class AwsUtils {
     private AmazonS3Client s3Client;
     private String s3Bucket;
 
-    public void uploadToS3(Context context, File file) {
-        TransferNetworkLossHandler.getInstance(context);
-
-        TransferUtility transferUtility =
-                TransferUtility.builder()
-                        .context(context)
-                        .awsConfiguration(new AWSConfiguration(context))
-                        .s3Client(getS3Client(context))
-                        .build();
-
-        TransferObserver observer = transferUtility.upload(
+    public void uploadToS3(Context context, File file, TransferListener transferListener) {
+        TransferObserver observer = getTransferUtility(context).upload(
                 getS3Bucket(context),
                 file.getName(),
                 file,
                 CannedAccessControlList.Private
         );
 
-        observer.setTransferListener(new TransferListener() {
-            @Override
-            public void onStateChanged(int id, TransferState state) {
-                if (state.equals(TransferState.COMPLETED)) {
+        observer.setTransferListener(transferListener);
+    }
 
-                } else if (state.equals(TransferState.FAILED)) {
+    public void downloadFromS3(Context context, File file, TransferListener transferListener) {
+        TransferObserver observer = getTransferUtility(context).download(
+                getS3Bucket(context),
+                file.getName(),
+                file
+        );
 
-                }
+        observer.setTransferListener(transferListener);
+    }
 
-            }
+    private TransferUtility getTransferUtility(Context context) {
+        TransferNetworkLossHandler.getInstance(context);
 
-            @Override
-            public void onProgressChanged(int id, long bytesCurrent, long bytesTotal) {
-
-            }
-
-            @Override
-            public void onError(int id, Exception ex) {
-
-            }
-        });
+        return TransferUtility.builder()
+                .context(context)
+                .awsConfiguration(new AWSConfiguration(context))
+                .s3Client(getS3Client(context))
+                .build();
     }
 
     private AWSCredentialsProvider getCredProvider(Context context) {
@@ -112,7 +102,7 @@ public class AwsUtils {
     public String getS3Bucket(Context context) {
         if (s3Bucket == null) {
             try {
-                return new AWSConfiguration(context)
+                s3Bucket = new AWSConfiguration(context)
                         .optJsonObject("S3TransferUtility")
                         .getString("Bucket");
             } catch (JSONException e) {

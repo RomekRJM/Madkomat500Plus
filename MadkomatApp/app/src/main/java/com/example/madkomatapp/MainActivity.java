@@ -21,6 +21,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import com.amazonaws.mobileconnectors.s3.transferutility.TransferListener;
+import com.amazonaws.mobileconnectors.s3.transferutility.TransferState;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
 import com.karumi.dexter.PermissionToken;
@@ -30,7 +32,7 @@ import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 import java.io.File;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements TransferListener {
 
     // Activity request codes
     private static final int CAMERA_CAPTURE_IMAGE_REQUEST_CODE = 100;
@@ -50,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String IMAGE_EXTENSION = "jpg";
 
     private static String imageStoragePath;
+    private static String responseStoragePath;
 
     private TextView txtDescription;
     private ImageView imgPreview;
@@ -194,7 +197,11 @@ public class MainActivity extends AppCompatActivity {
 
                 previewCapturedImage();
 
-                new AwsUtils().uploadToS3(getApplicationContext(), new File(imageStoragePath));
+                AwsUtils awsUtils = new AwsUtils();
+
+                awsUtils.uploadToS3(getApplicationContext(), new File(imageStoragePath), this);
+
+                awsUtils.downloadFromS3(getApplicationContext(), new File(getJsonFilePath()), this);
 
             } else if (resultCode == RESULT_CANCELED) {
                 // user cancelled Image capture
@@ -243,6 +250,10 @@ public class MainActivity extends AppCompatActivity {
         return bitmap;
     }
 
+    private String getJsonFilePath() {
+        return imageStoragePath.replace(".jpg", ".json");
+    }
+
     /**
      * Alert dialog to navigate to app settings
      * to enable necessary permissions
@@ -261,5 +272,25 @@ public class MainActivity extends AppCompatActivity {
 
                     }
                 }).show();
+    }
+
+    @Override
+    public void onStateChanged(int id, TransferState state) {
+        if (state.equals(TransferState.COMPLETED)) {
+
+        } else if (state.equals(TransferState.FAILED)) {
+
+        }
+
+    }
+
+    @Override
+    public void onProgressChanged(int id, long bytesCurrent, long bytesTotal) {
+
+    }
+
+    @Override
+    public void onError(int id, Exception ex) {
+
     }
 }
