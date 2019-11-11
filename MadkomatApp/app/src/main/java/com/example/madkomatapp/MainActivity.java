@@ -21,7 +21,6 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import com.amazonaws.mobile.client.AWSMobileClient;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
 import com.karumi.dexter.PermissionToken;
@@ -94,8 +93,6 @@ public class MainActivity extends AppCompatActivity {
 
         restoreFromBundle(savedInstanceState);
 
-        AWSMobileClient.getInstance().initialize(this).execute();
-
     }
 
     /**
@@ -154,6 +151,7 @@ public class MainActivity extends AppCompatActivity {
         Uri fileUri = CameraUtils.getOutputMediaFileUri(getApplicationContext(), file);
 
         intent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri);
+        intent.putExtra("android.intent.extra.CAMERA_FACING", 1);
 
         // start the image capture Intent
         startActivityForResult(intent, CAMERA_CAPTURE_IMAGE_REQUEST_CODE);
@@ -196,7 +194,7 @@ public class MainActivity extends AppCompatActivity {
 
                 previewCapturedImage();
 
-                AwsUtils.uploadToS3(getApplicationContext(), new File(imageStoragePath));
+                new AwsUtils().uploadToS3(getApplicationContext(), new File(imageStoragePath));
 
             } else if (resultCode == RESULT_CANCELED) {
                 // user cancelled Image capture
