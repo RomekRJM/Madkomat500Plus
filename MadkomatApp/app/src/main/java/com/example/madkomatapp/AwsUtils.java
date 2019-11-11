@@ -24,11 +24,10 @@ import java.util.concurrent.CountDownLatch;
 
 public class AwsUtils {
 
-    private static final String BUCKET = "madkomat-070093830049";
-
     public static final String NAME = AwsUtils.class.getSimpleName();
     private AWSCredentialsProvider mobileClient;
     private AmazonS3Client s3Client;
+    private String s3Bucket;
 
     public void uploadToS3(Context context, File file) {
         TransferNetworkLossHandler.getInstance(context);
@@ -41,7 +40,7 @@ public class AwsUtils {
                         .build();
 
         TransferObserver observer = transferUtility.upload(
-                BUCKET,
+                getS3Bucket(context),
                 file.getName(),
                 file,
                 CannedAccessControlList.Private
@@ -108,5 +107,18 @@ public class AwsUtils {
             }
         }
         return s3Client;
+    }
+
+    public String getS3Bucket(Context context) {
+        if (s3Bucket == null) {
+            try {
+                return new AWSConfiguration(context)
+                        .optJsonObject("S3TransferUtility")
+                        .getString("Bucket");
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        return s3Bucket;
     }
 }
