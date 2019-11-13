@@ -49,7 +49,7 @@ public class AwsUtils {
         observer.setTransferListener(transferListener);
     }
 
-    private TransferUtility getTransferUtility(Context context) {
+    public TransferUtility getTransferUtility(Context context) {
         TransferNetworkLossHandler.getInstance(context);
 
         return TransferUtility.builder()

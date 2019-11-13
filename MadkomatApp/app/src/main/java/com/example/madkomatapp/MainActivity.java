@@ -21,8 +21,6 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import com.amazonaws.mobileconnectors.s3.transferutility.TransferListener;
-import com.amazonaws.mobileconnectors.s3.transferutility.TransferState;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
 import com.karumi.dexter.PermissionToken;
@@ -32,7 +30,7 @@ import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 import java.io.File;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements TransferListener {
+public class MainActivity extends AppCompatActivity {
 
     // Activity request codes
     private static final int CAMERA_CAPTURE_IMAGE_REQUEST_CODE = 100;
@@ -197,11 +195,13 @@ public class MainActivity extends AppCompatActivity implements TransferListener 
 
                 previewCapturedImage();
 
-                AwsUtils awsUtils = new AwsUtils();
+                beginTransferInBackground(S3Service.TransferOperation.TRANSFER_OPERATION_UPLOAD,
+                        new File(imageStoragePath));
 
-                awsUtils.uploadToS3(getApplicationContext(), new File(imageStoragePath), this);
 
-                awsUtils.downloadFromS3(getApplicationContext(), new File(getJsonFilePath()), this);
+                beginTransferInBackground(S3Service.TransferOperation.TRANSFER_OPERATION_DOWNLOAD,
+                        new File(imageStoragePath));
+
 
             } else if (resultCode == RESULT_CANCELED) {
                 // user cancelled Image capture
@@ -274,23 +274,15 @@ public class MainActivity extends AppCompatActivity implements TransferListener 
                 }).show();
     }
 
-    @Override
-    public void onStateChanged(int id, TransferState state) {
-        if (state.equals(TransferState.COMPLETED)) {
-
-        } else if (state.equals(TransferState.FAILED)) {
-
-        }
-
+    private void beginTransferInBackground(S3Service.TransferOperation operation, File file) {
+        Intent intent = new Intent(this, S3Service.class);
+        intent.putExtra(S3Service.INTENT_TRANSFER_OPERATION, operation);
+        intent.putExtra(S3Service.INTENT_FILE, file);
+        startService(intent);
     }
 
-    @Override
-    public void onProgressChanged(int id, long bytesCurrent, long bytesTotal) {
 
-    }
-
-    @Override
-    public void onError(int id, Exception ex) {
+    public static void transferUpdated() {
 
     }
 }
