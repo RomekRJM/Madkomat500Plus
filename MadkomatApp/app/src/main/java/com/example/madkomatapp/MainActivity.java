@@ -27,6 +27,8 @@ import com.karumi.dexter.PermissionToken;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.io.File;
 import java.util.List;
 
@@ -196,11 +198,11 @@ public class MainActivity extends AppCompatActivity {
                 previewCapturedImage();
 
                 beginTransferInBackground(S3Service.TransferOperation.TRANSFER_OPERATION_UPLOAD,
-                        new File(imageStoragePath));
+                        imageStoragePath);
 
 
                 beginTransferInBackground(S3Service.TransferOperation.TRANSFER_OPERATION_DOWNLOAD,
-                        new File(imageStoragePath));
+                        getJsonFilePath());
 
 
             } else if (resultCode == RESULT_CANCELED) {
@@ -251,7 +253,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private String getJsonFilePath() {
-        return imageStoragePath.replace(".jpg", ".json");
+        return StringUtils.replace(imageStoragePath, ".jpg", ".json");
     }
 
     /**
@@ -274,10 +276,10 @@ public class MainActivity extends AppCompatActivity {
                 }).show();
     }
 
-    private void beginTransferInBackground(S3Service.TransferOperation operation, File file) {
+    private void beginTransferInBackground(S3Service.TransferOperation operation, String filePath) {
         Intent intent = new Intent(this, S3Service.class);
         intent.putExtra(S3Service.INTENT_TRANSFER_OPERATION, operation);
-        intent.putExtra(S3Service.INTENT_FILE, file);
+        intent.putExtra(S3Service.INTENT_FILE_PATH, filePath);
         startService(intent);
     }
 
