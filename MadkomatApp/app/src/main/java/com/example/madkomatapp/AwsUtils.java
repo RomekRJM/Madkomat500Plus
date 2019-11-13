@@ -28,28 +28,11 @@ public class AwsUtils {
     private AmazonS3Client s3Client;
     private String s3Bucket;
 
-    public void uploadToS3(Context context, File file, TransferListener transferListener) {
-        TransferObserver observer = getTransferUtility(context).upload(
-                getS3Bucket(context),
-                file.getName(),
-                file,
-                CannedAccessControlList.Private
-        );
-
-        observer.setTransferListener(transferListener);
+    public boolean keyExists(Context context, String bucket, String key) {
+        return getS3Client(context).doesObjectExist(bucket, key);
     }
 
-    public void downloadFromS3(Context context, File file, TransferListener transferListener) {
-        TransferObserver observer = getTransferUtility(context).download(
-                getS3Bucket(context),
-                file.getName(),
-                file
-        );
-
-        observer.setTransferListener(transferListener);
-    }
-
-    private TransferUtility getTransferUtility(Context context) {
+    public TransferUtility getTransferUtility(Context context) {
         TransferNetworkLossHandler.getInstance(context);
 
         return TransferUtility.builder()
