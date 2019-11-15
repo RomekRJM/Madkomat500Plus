@@ -53,10 +53,10 @@ public class S3Service extends Service {
 
         switch (transferOperation) {
             case TRANSFER_OPERATION_DOWNLOAD:
-                //handleDownload(key, filePath);
+                handleDownload(key, filePath);
                 break;
             case TRANSFER_OPERATION_UPLOAD:
-                //handleUpload(key, filePath);
+                handleUpload(key, filePath);
                 break;
         }
 
@@ -126,7 +126,6 @@ public class S3Service extends Service {
         public void onError(int id, Exception e) {
             Log.e(TAG, "onError: " + id, e);
             if (notifyDownloadActivityNeeded) {
-                MainActivity.transferUpdated();
                 notifyDownloadActivityNeeded = false;
             }
         }
@@ -136,7 +135,6 @@ public class S3Service extends Service {
             Log.d(TAG, String.format("onProgressChanged: %d, total: %d, current: %d",
                     id, bytesTotal, bytesCurrent));
             if (notifyDownloadActivityNeeded) {
-                MainActivity.transferUpdated();
                 notifyDownloadActivityNeeded = false;
             }
         }
@@ -145,7 +143,7 @@ public class S3Service extends Service {
         public void onStateChanged(int id, TransferState state) {
             Log.d(TAG, "onStateChanged: " + id + ", " + state);
             if (notifyDownloadActivityNeeded) {
-                MainActivity.transferUpdated();
+                MainActivity.transferUpdated(TransferOperation.TRANSFER_OPERATION_UPLOAD, state);
                 notifyDownloadActivityNeeded = false;
             }
         }
@@ -160,7 +158,6 @@ public class S3Service extends Service {
         public void onError(int id, Exception e) {
             Log.e(TAG, "onError: " + id, e);
             if (notifyUploadActivityNeeded) {
-                MainActivity.transferUpdated();
                 notifyUploadActivityNeeded = false;
             }
         }
@@ -170,7 +167,6 @@ public class S3Service extends Service {
             Log.d(TAG, String.format("onProgressChanged: %d, total: %d, current: %d",
                     id, bytesTotal, bytesCurrent));
             if (notifyUploadActivityNeeded) {
-                MainActivity.transferUpdated();
                 notifyUploadActivityNeeded = false;
             }
         }
@@ -179,7 +175,7 @@ public class S3Service extends Service {
         public void onStateChanged(int id, TransferState state) {
             Log.d(TAG, "onStateChanged: " + id + ", " + state);
             if (notifyUploadActivityNeeded) {
-                MainActivity.transferUpdated();
+                MainActivity.transferUpdated(TransferOperation.TRANSFER_OPERATION_DOWNLOAD, state);
                 notifyUploadActivityNeeded = false;
             }
         }

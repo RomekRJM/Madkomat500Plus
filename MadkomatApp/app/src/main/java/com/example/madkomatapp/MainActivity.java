@@ -21,6 +21,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import com.amazonaws.mobileconnectors.s3.transferutility.TransferState;
 import com.example.madkomatapp.aws.S3Service;
 import com.example.madkomatapp.camera.CameraUtils;
 import com.karumi.dexter.Dexter;
@@ -286,7 +287,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public static void transferUpdated() {
+    public static void transferUpdated(S3Service.TransferOperation transferOperation, TransferState state) {
+        if (TransferState.COMPLETED.equals(state) &&
+                S3Service.TransferOperation.TRANSFER_OPERATION_DOWNLOAD.equals(transferOperation)) {
 
+        }
     }
 }
