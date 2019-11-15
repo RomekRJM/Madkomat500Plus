@@ -229,7 +229,7 @@ public class MainActivity extends AppCompatActivity {
             imgPreview.setVisibility(View.VISIBLE);
 
             Bitmap bitmap = CameraUtils.optimizeBitmap(BITMAP_SAMPLE_SIZE, imageStoragePath);
-            drawRectOnTop(bitmap, 0f, 0.7f, 0.5f, 0.2f);
+            drawRectOnTop(bitmap, 0.25f, 0.7f, 0.5f, 0.2f);
 
             imgPreview.setImageBitmap(bitmap);
 
@@ -238,13 +238,13 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private Bitmap drawRectOnTop(Bitmap bitmap, float x, float y, float width, float height) {
+    private Bitmap drawRectOnTop(Bitmap bitmap, float width, float height, float left, float top) {
         Canvas canvas = new Canvas(bitmap);
         Paint paint = new Paint();
         paint.setColor(Color.argb(128, 255, 0, 0));
 
-        float rectX = x * bitmap.getWidth();
-        float rectY = y * bitmap.getHeight();
+        float rectX = left * bitmap.getWidth();
+        float rectY = top * bitmap.getHeight();
         float rectWidth = width * bitmap.getWidth();
         float rectHeight = height * bitmap.getHeight();
 

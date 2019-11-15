@@ -52,10 +52,10 @@ public class S3Service extends Service {
 
         switch (transferOperation) {
             case TRANSFER_OPERATION_DOWNLOAD:
-                handleDownload(key, filePath);
+                //handleDownload(key, filePath);
                 break;
             case TRANSFER_OPERATION_UPLOAD:
-                handleUpload(key, filePath);
+                //handleUpload(key, filePath);
                 break;
         }
 
