@@ -14,7 +14,8 @@ public class RecognitionParser {
 
         try {
             JSONObject reader = new JSONObject(doc);
-            JSONArray faceDetails = reader.getJSONArray("FaceDetails");
+            JSONObject response = reader.getJSONObject("Response");
+            JSONArray faceDetails = response.getJSONArray("FaceDetails");
 
             for(int i=0; i<faceDetails.length(); ++i) {
                 JSONObject faceDetail = faceDetails.getJSONObject(i);

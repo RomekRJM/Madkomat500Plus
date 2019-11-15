@@ -11,6 +11,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -22,8 +23,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferState;
+import com.amazonaws.util.IOUtils;
 import com.example.madkomatapp.aws.S3Service;
 import com.example.madkomatapp.camera.CameraUtils;
+import com.example.madkomatapp.face.Face;
+import com.example.madkomatapp.face.RecognitionParser;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
 import com.karumi.dexter.PermissionToken;
@@ -33,6 +37,8 @@ import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -55,11 +61,12 @@ public class MainActivity extends AppCompatActivity {
     public static final String IMAGE_EXTENSION = "jpg";
 
     private static String imageStoragePath;
-    private static String responseStoragePath;
 
     private TextView txtDescription;
-    private ImageView imgPreview;
+    private static ImageView imgPreview;
     private Button btnCapturePicture;
+
+    private final static String TAG = MainActivity.class.getSimpleName();
 
 
     @Override
@@ -232,7 +239,6 @@ public class MainActivity extends AppCompatActivity {
             imgPreview.setVisibility(View.VISIBLE);
 
             Bitmap bitmap = CameraUtils.optimizeBitmap(BITMAP_SAMPLE_SIZE, imageStoragePath);
-            drawRectOnTop(bitmap, 0.25f, 0.7f, 0.5f, 0.2f);
 
             imgPreview.setImageBitmap(bitmap);
 
@@ -241,21 +247,28 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private Bitmap drawRectOnTop(Bitmap bitmap, float width, float height, float left, float top) {
+    private static Bitmap drawRectOnTop(Bitmap bitmap, Face face) {
         Canvas canvas = new Canvas(bitmap);
         Paint paint = new Paint();
-        paint.setColor(Color.argb(128, 255, 0, 0));
 
-        float rectX = left * bitmap.getWidth();
-        float rectY = top * bitmap.getHeight();
-        float rectWidth = width * bitmap.getWidth();
-        float rectHeight = height * bitmap.getHeight();
+        int color = Color.argb(128, 255, 0, 0);
+
+        if(face.isSmilingKid()) {
+            color = Color.argb(128, 0, 255, 0);
+        }
+
+        paint.setColor(color);
+
+        float rectX = (float)(face.getLeft() * bitmap.getWidth());
+        float rectY = (float)(face.getTop() * bitmap.getHeight());
+        float rectWidth = (float)(face.getWidth() * bitmap.getWidth());
+        float rectHeight = (float)(face.getHeight() * bitmap.getHeight());
 
         canvas.drawRect(rectX, rectY, rectX + rectWidth, rectY + rectHeight, paint);
         return bitmap;
     }
 
-    private String getJsonFilePath() {
+    private static String getJsonFilePath() {
         return StringUtils.replace(imageStoragePath, ".jpg", ".json");
     }
 
@@ -291,6 +304,22 @@ public class MainActivity extends AppCompatActivity {
         if (TransferState.COMPLETED.equals(state) &&
                 S3Service.TransferOperation.TRANSFER_OPERATION_DOWNLOAD.equals(transferOperation)) {
 
+            Bitmap bitmap = CameraUtils.optimizeBitmap(BITMAP_SAMPLE_SIZE, imageStoragePath);
+            String response = "";
+
+            try {
+                response = IOUtils.toString(new FileInputStream(new File(getJsonFilePath())));
+            } catch (IOException e) {
+                Log.e(TAG, e.getMessage(), e);
+            }
+
+            List<Face> faces = RecognitionParser.extractFaces(response);
+
+            for(Face face : faces) {
+                drawRectOnTop(bitmap, face);
+            }
+
+            imgPreview.setImageBitmap(bitmap);
         }
     }
 }

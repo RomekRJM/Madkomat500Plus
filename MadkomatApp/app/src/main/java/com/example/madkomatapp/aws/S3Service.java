@@ -119,65 +119,45 @@ public class S3Service extends Service {
 
     private class DownloadListener implements TransferListener {
 
-        private boolean notifyDownloadActivityNeeded = true;
-
         // Simply updates the list when notified.
         @Override
         public void onError(int id, Exception e) {
             Log.e(TAG, "onError: " + id, e);
-            if (notifyDownloadActivityNeeded) {
-                notifyDownloadActivityNeeded = false;
-            }
         }
 
         @Override
         public void onProgressChanged(int id, long bytesCurrent, long bytesTotal) {
             Log.d(TAG, String.format("onProgressChanged: %d, total: %d, current: %d",
                     id, bytesTotal, bytesCurrent));
-            if (notifyDownloadActivityNeeded) {
-                notifyDownloadActivityNeeded = false;
-            }
         }
 
         @Override
         public void onStateChanged(int id, TransferState state) {
             Log.d(TAG, "onStateChanged: " + id + ", " + state);
-            if (notifyDownloadActivityNeeded) {
-                MainActivity.transferUpdated(TransferOperation.TRANSFER_OPERATION_UPLOAD, state);
-                notifyDownloadActivityNeeded = false;
+
+            if (TransferState.COMPLETED.equals(state)) {
+                MainActivity.transferUpdated(TransferOperation.TRANSFER_OPERATION_DOWNLOAD, state);
             }
         }
     }
 
     private class UploadListener implements TransferListener {
 
-        private boolean notifyUploadActivityNeeded = true;
-
         // Simply updates the list when notified.
         @Override
         public void onError(int id, Exception e) {
             Log.e(TAG, "onError: " + id, e);
-            if (notifyUploadActivityNeeded) {
-                notifyUploadActivityNeeded = false;
-            }
         }
 
         @Override
         public void onProgressChanged(int id, long bytesCurrent, long bytesTotal) {
             Log.d(TAG, String.format("onProgressChanged: %d, total: %d, current: %d",
                     id, bytesTotal, bytesCurrent));
-            if (notifyUploadActivityNeeded) {
-                notifyUploadActivityNeeded = false;
-            }
         }
 
         @Override
         public void onStateChanged(int id, TransferState state) {
             Log.d(TAG, "onStateChanged: " + id + ", " + state);
-            if (notifyUploadActivityNeeded) {
-                MainActivity.transferUpdated(TransferOperation.TRANSFER_OPERATION_DOWNLOAD, state);
-                notifyUploadActivityNeeded = false;
-            }
         }
     }
 }
