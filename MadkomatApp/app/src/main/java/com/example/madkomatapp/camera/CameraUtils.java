@@ -1,4 +1,4 @@
-package com.example.madkomatapp;
+package com.example.madkomatapp.camera;
 
 import android.Manifest;
 import android.content.Context;
@@ -14,6 +14,9 @@ import android.util.Log;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
+
+import com.example.madkomatapp.BuildConfig;
+import com.example.madkomatapp.MainActivity;
 
 import java.io.File;
 import java.text.SimpleDateFormat;

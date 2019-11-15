@@ -1,4 +1,4 @@
-package com.example.madkomatapp;
+package com.example.madkomatapp.aws;
 
 import android.app.Service;
 import android.content.Context;
@@ -11,6 +11,7 @@ import com.amazonaws.mobileconnectors.s3.transferutility.TransferListener;
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferObserver;
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferState;
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferUtility;
+import com.example.madkomatapp.MainActivity;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -23,8 +24,8 @@ public class S3Service extends Service {
     private TransferUtility transferUtility;
     private String s3Bucket;
 
-    final static String INTENT_FILE_PATH = "filePath";
-    final static String INTENT_TRANSFER_OPERATION = "transferOperation";
+    public final static String INTENT_FILE_PATH = "filePath";
+    public final static String INTENT_TRANSFER_OPERATION = "transferOperation";
 
     static Context context;
 

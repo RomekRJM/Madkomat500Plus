@@ -10,7 +10,7 @@ import java.util.List;
 
 public class RecognitionParser {
     public static final List<Face> extractFaces(String doc) {
-        List<Face> faces = new ArrayList<Face>();
+        List<Face> faces = new ArrayList<>();
 
         try {
             JSONObject reader = new JSONObject(doc);

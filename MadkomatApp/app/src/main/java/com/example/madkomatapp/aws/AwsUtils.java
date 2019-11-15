@@ -1,4 +1,4 @@
-package com.example.madkomatapp;
+package com.example.madkomatapp.aws;
 
 import android.content.Context;
 import android.util.Log;
@@ -8,17 +8,13 @@ import com.amazonaws.mobile.client.AWSMobileClient;
 import com.amazonaws.mobile.client.Callback;
 import com.amazonaws.mobile.client.UserStateDetails;
 import com.amazonaws.mobile.config.AWSConfiguration;
-import com.amazonaws.mobileconnectors.s3.transferutility.TransferListener;
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferNetworkLossHandler;
-import com.amazonaws.mobileconnectors.s3.transferutility.TransferObserver;
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferUtility;
 import com.amazonaws.regions.Region;
 import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.model.CannedAccessControlList;
 
 import org.json.JSONException;
 
-import java.io.File;
 import java.util.concurrent.CountDownLatch;
 
 public class AwsUtils {
