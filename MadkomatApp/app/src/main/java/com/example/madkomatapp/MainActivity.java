@@ -320,6 +320,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             imgPreview.setImageBitmap(bitmap);
+            CameraUtils.writeBitmapToFile(imageStoragePath, bitmap);
         }
     }
 }

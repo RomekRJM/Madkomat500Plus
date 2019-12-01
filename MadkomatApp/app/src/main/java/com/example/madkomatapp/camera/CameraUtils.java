@@ -19,6 +19,8 @@ import com.example.madkomatapp.BuildConfig;
 import com.example.madkomatapp.MainActivity;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -45,13 +47,9 @@ public class CameraUtils {
                 && ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
     }
 
-    /**
-     * Downsizing the bitmap and making it mutable to avoid OutOfMemory exceptions
-     */
     public static Bitmap optimizeBitmap(int sampleSize, String filePath) {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inMutable = true;
-        options.inSampleSize = sampleSize;
 
         return BitmapFactory.decodeFile(filePath, options);
     }
@@ -112,6 +110,25 @@ public class CameraUtils {
 
         return new File(mediaStorageDir.getPath() + File.separator
                 + "IMG_" + timeStamp + "." + MainActivity.IMAGE_EXTENSION);
+    }
+
+    public static void writeBitmapToFile(String path, Bitmap bitmap) {
+        File file = new File(path);
+        FileOutputStream fout = null;
+
+        try {
+            fout = new FileOutputStream(file);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fout);
+            fout.close();
+        } catch (IOException e) {
+        } finally {
+            if (fout != null) {
+                try {
+                    fout.close();
+                } catch (IOException e) {
+                }
+            }
+        }
     }
 
 }
