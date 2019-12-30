@@ -14,7 +14,6 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,6 +27,7 @@ import com.example.madkomatapp.aws.S3Service;
 import com.example.madkomatapp.camera.CameraUtils;
 import com.example.madkomatapp.face.Face;
 import com.example.madkomatapp.face.RecognitionParser;
+import com.example.madkomatapp.image.ImagePreview;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
 import com.karumi.dexter.PermissionToken;
@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
     private static String imageStoragePath;
 
     private TextView txtDescription;
-    private static ImageView imgPreview;
+    private static ImagePreview imgPreview;
     private Button btnCapturePicture;
 
     private final static String TAG = MainActivity.class.getSimpleName();
@@ -214,6 +214,8 @@ public class MainActivity extends AppCompatActivity {
                 beginTransferInBackground(S3Service.TransferOperation.TRANSFER_OPERATION_DOWNLOAD,
                         getJsonFilePath());
 
+                imgPreview.startAnimator();
+
 
             } else if (resultCode == RESULT_CANCELED) {
                 // user cancelled Image capture
@@ -240,7 +242,7 @@ public class MainActivity extends AppCompatActivity {
 
             Bitmap bitmap = CameraUtils.optimizeBitmap(BITMAP_SAMPLE_SIZE, imageStoragePath);
 
-            imgPreview.setImageBitmap(bitmap);
+            imgPreview.setBackgroundImage(bitmap);
 
         } catch (NullPointerException e) {
             e.printStackTrace();
