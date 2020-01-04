@@ -4,8 +4,11 @@ import lejos.nxt.*;
 import lejos.nxt.comm.*;
 
 public class CommTest {
+    private static final int PROCEED = 8;
+    private static final int SUCCESS = 16;
+
     public static void main(String[] args) {
-        int proceed = 10;
+
         NXTConnection connection = null;
 
         LCD.drawString("Press a button to start", 0, 1);
@@ -14,10 +17,14 @@ public class CommTest {
         connection = Bluetooth.waitForConnection();
 
         DataInputStream dataIn = connection.openDataInputStream();
+        DataOutputStream dataOut = connection.openDataOutputStream();
+
         try {
-            if (dataIn.readInt() == proceed) {
+            if (dataIn.readInt() == PROCEED) {
                 LCD.drawString("Received PROCEED signal", 0, 1);
                 Button.waitForAnyPress();
+                LCD.drawString("Sending SUCCESS signal", 0, 1);
+                dataOut.writeInt(SUCCESS);
             }
         } catch (IOException e) {
             System.out.println(" write error " + e);

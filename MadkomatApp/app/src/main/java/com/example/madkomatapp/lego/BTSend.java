@@ -8,25 +8,23 @@ import lejos.pc.comm.NXTComm;
 import lejos.pc.comm.NXTCommLogListener;
 import lejos.pc.comm.NXTConnector;
 
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 
 public class BTSend extends Thread {
     static final String TAG = "BTSend";
     private NXTConnector conn;
-    Handler mUIMessageHandler;
     DataOutputStream dos;
     DataInputStream dis;
+
+    private static final int PROCEED = 8;
+    private static final int SUCCESS = 16;
 
     public static enum CONN_TYPE {
         LEJOS_PACKET, LEGO_LCP
     }
 
-    public BTSend(Handler mUIMessageHandler) {
-
+    public BTSend() {
         super();
-        this.mUIMessageHandler = mUIMessageHandler;
     }
 
     public void closeConnection() {
@@ -76,39 +74,25 @@ public class BTSend extends Thread {
     @Override
     public void run() {
         Log.d(TAG, "BTSend run");
-        Looper.prepare();
 
         conn = connect(CONN_TYPE.LEJOS_PACKET);
 
         dos = new DataOutputStream(conn.getOutputStream());
         dis = new DataInputStream(conn.getInputStream());
 
-        int x;
-        for (int i = 0; i < 100; i++) {
+        try {
+            dos.writeInt(PROCEED);
+            dos.flush();
+            Log.i(TAG, "sent PROCEED signal");
 
-            try {
-                dos.writeInt((i * 30000));
-                dos.flush();
-                Log.i(TAG, "sent:" + i * 30000);
-                yield();
-                x = dis.readInt();
-                if (x > 0) {
-
-                    Log.i(TAG, "got: " + x);
-                }
-                Log.d(TAG, "sent:" + i * 30000 + " got:" + x);
-                Log.i(TAG, "sent:" + i * 30000 + " got:" + x);
-                yield();
-            } catch (IOException e) {
-                Log.e(TAG, "Error ... ", e);
-
+            if (dis.readInt() == SUCCESS) {
+                Log.i(TAG, "got SUCCESS message");
             }
-
+        } catch (IOException e) {
+            Log.e(TAG, "Error ... ", e);
         }
 
         closeConnection();
-        Looper.loop();
-        Looper.myLooper().quit();
         Log.i(TAG, "BTSend finished it's run");
     }
 
