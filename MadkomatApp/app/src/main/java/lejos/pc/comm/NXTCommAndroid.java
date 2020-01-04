@@ -366,8 +366,7 @@ public class NXTCommAndroid implements NXTComm {
         return b;
     }
 
-    public NXTInfo[] search(String name, int protocol) throws NXTCommException {
-        //Log.d(TAG, "search");
+    public NXTInfo[] search(String name) throws NXTCommException {
         nxtInfos = new Vector<NXTInfo>();
         devices = new Vector<BluetoothDevice>();
         mBtAdapter = BluetoothAdapter.getDefaultAdapter();

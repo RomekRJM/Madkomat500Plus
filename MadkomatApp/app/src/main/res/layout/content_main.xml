@@ -39,7 +39,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:weightSum="1">
+        android:weightSum="2">
 
         <!-- Capture picture button -->
         <Button
@@ -52,6 +52,19 @@
             android:foreground="?attr/selectableItemBackground"
             android:text="@string/btn_take_picture"
             android:textColor="@android:color/white" />
+
+        <Button
+            android:id="@+id/btnTestBTConnection"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="@dimen/dimen_8"
+            android:layout_weight="1"
+            android:background="@color/colorPrimary"
+            android:foreground="?attr/selectableItemBackground"
+            android:text="BT test"
+            android:textColor="@android:color/white"
+            android:visibility="visible"
+            />
 
     </LinearLayout>
 </LinearLayout>

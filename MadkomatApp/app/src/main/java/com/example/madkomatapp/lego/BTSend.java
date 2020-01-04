@@ -1,5 +1,7 @@
 package com.example.madkomatapp.lego;
 
+import android.util.Log;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -7,8 +9,6 @@ import java.io.IOException;
 import lejos.pc.comm.NXTComm;
 import lejos.pc.comm.NXTCommLogListener;
 import lejos.pc.comm.NXTConnector;
-
-import android.util.Log;
 
 public class BTSend extends Thread {
     static final String TAG = "BTSend";

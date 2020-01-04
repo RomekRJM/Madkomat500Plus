@@ -28,6 +28,8 @@ import com.example.madkomatapp.camera.CameraUtils;
 import com.example.madkomatapp.face.Face;
 import com.example.madkomatapp.face.RecognitionParser;
 import com.example.madkomatapp.image.ImagePreview;
+import com.example.madkomatapp.lego.BTSend;
+import com.example.madkomatapp.lego.NXJCache;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
 import com.karumi.dexter.PermissionToken;
@@ -65,6 +67,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView txtDescription;
     private static ImagePreview imgPreview;
     private Button btnCapturePicture;
+    private Button btnTestBTConnection;
 
     private final static String TAG = MainActivity.class.getSimpleName();
 
@@ -88,10 +91,8 @@ public class MainActivity extends AppCompatActivity {
         txtDescription = findViewById(R.id.txt_desc);
         imgPreview = findViewById(R.id.imgPreview);
         btnCapturePicture = findViewById(R.id.btnCapturePicture);
+        btnTestBTConnection = findViewById(R.id.btnTestBTConnection);
 
-        /**
-         * Capture image on button click
-         */
         btnCapturePicture.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -104,6 +105,15 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        btnTestBTConnection.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                new BTSend().start();
+            }
+        });
+
+        NXJCache.setup();
         restoreFromBundle(savedInstanceState);
 
     }
@@ -231,9 +241,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     * Display image from gallery
-     */
     private void previewCapturedImage() {
         try {
             txtDescription.setVisibility(View.GONE);
