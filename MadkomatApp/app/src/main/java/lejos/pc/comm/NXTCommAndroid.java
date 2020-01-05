@@ -1,5 +1,10 @@
 package lejos.pc.comm;
 
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothSocket;
+import android.util.Log;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -10,10 +15,7 @@ import java.util.Vector;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.SynchronousQueue;
 
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothSocket;
-import android.util.Log;
+import static java.lang.Boolean.*;
 
 public class NXTCommAndroid implements NXTComm {
 
@@ -22,7 +24,7 @@ public class NXTCommAndroid implements NXTComm {
         private final BluetoothDevice mmDevice;
         private SynchronousQueue<Boolean> connectQueue;
 
-        public ConnectThread(BluetoothDevice device, SynchronousQueue<Boolean> connectQueue) {
+        ConnectThread(BluetoothDevice device, SynchronousQueue<Boolean> connectQueue) {
             mmDevice = device;
             BluetoothSocket tmp = null;
             this.connectQueue = connectQueue;
@@ -34,7 +36,7 @@ public class NXTCommAndroid implements NXTComm {
             mmSocket = tmp;
         }
 
-        public void cancel() {
+        void cancel() {
             try {
                 mmSocket.close();
             } catch (IOException e) {
@@ -46,8 +48,8 @@ public class NXTCommAndroid implements NXTComm {
 
         private void relayConnectionSuccess() {
             try {// notify calling thread that connection succeeded
-                connectQueue.put(new Boolean(true));
-            } catch (InterruptedException e) {
+                connectQueue.put(TRUE);
+            } catch (InterruptedException ignored) {
 
             }
             //Log.d(TAG, "Connection success -- is connected to " + mmDevice.getName());
@@ -58,9 +60,9 @@ public class NXTCommAndroid implements NXTComm {
         private void relyConnectionFailure(IOException e) {
             try {
                 // notify calling thread that connection failed
-                connectQueue.put(new Boolean(false));
+                connectQueue.put(FALSE);
                 Log.e(TAG, "Connection failure -- unable to connect to socket ", e);
-            } catch (InterruptedException e1) {
+            } catch (InterruptedException ignored) {
 
             }
 
@@ -95,7 +97,7 @@ public class NXTCommAndroid implements NXTComm {
         boolean running = true;
         LinkedBlockingQueue<byte[]> mReadQueue;
 
-        public ReadThread(BluetoothSocket socket, LinkedBlockingQueue<byte[]> mReadQueue) {
+        ReadThread(BluetoothSocket socket, LinkedBlockingQueue<byte[]> mReadQueue) {
             try {
                 is = socket.getInputStream();
                 //Log.d(TAG, "socket is connected to: " + socket.getRemoteDevice().getName());
@@ -105,7 +107,7 @@ public class NXTCommAndroid implements NXTComm {
             }
         }
 
-        public void cancel() {
+        void cancel() {
             running = false;
             mReadQueue.clear();
         }
@@ -176,7 +178,6 @@ public class NXTCommAndroid implements NXTComm {
             byte[] tmp_data;
             while (running) {
                 Thread.yield();
-                tmp_data = null;
 
                 if (nxtInfo.connectionState == NXTConnectionState.LCP_CONNECTED) {
                     tmp_data = readLCP();
@@ -201,7 +202,7 @@ public class NXTCommAndroid implements NXTComm {
         private boolean running = true;
         LinkedBlockingQueue<byte[]> mWriteQueueT;
 
-        public WriteThread(BluetoothSocket socket, LinkedBlockingQueue<byte[]> mWriteQueue) {
+        WriteThread(BluetoothSocket socket, LinkedBlockingQueue<byte[]> mWriteQueue) {
             try {
                 os = socket.getOutputStream();
                 this.mWriteQueueT = mWriteQueue;
@@ -210,7 +211,7 @@ public class NXTCommAndroid implements NXTComm {
             }
         }
 
-        public void cancel() {
+        void cancel() {
             running = false;
             mReadQueue.clear();
         }
@@ -250,7 +251,7 @@ public class NXTCommAndroid implements NXTComm {
     private static Vector<NXTInfo> nxtInfos;
 
     private final String TAG = "NXTCommAndroid >>>>";
-    protected String mConnectedDeviceName;
+    private String mConnectedDeviceName;
 
     private ConnectThread mConnectThread;
     private ReadThread mReadThread;
@@ -263,7 +264,7 @@ public class NXTCommAndroid implements NXTComm {
 
     private SynchronousQueue<Boolean> connectQueue;
 
-    public int available() throws IOException {
+    public int available() {
         return 0;
     }
 
@@ -286,7 +287,7 @@ public class NXTCommAndroid implements NXTComm {
         }
     }
 
-    public void close() throws IOException {
+    public void close() {
         Log.d(TAG, "closing threads and socket");
         cancelIOThreads();
         cancelConnectThread();
@@ -318,8 +319,8 @@ public class NXTCommAndroid implements NXTComm {
     public boolean open(NXTInfo nxt, int mode) throws NXTCommException {
         if (mode == RAW)
             throw new NXTCommException("RAW mode not implemented");
-        BluetoothDevice nxtDevice = null;
-        connectQueue = new SynchronousQueue<Boolean>();
+        BluetoothDevice nxtDevice;
+        connectQueue = new SynchronousQueue<>();
         if (mBtAdapter == null) {
             mBtAdapter = BluetoothAdapter.getDefaultAdapter();
         }
@@ -334,7 +335,7 @@ public class NXTCommAndroid implements NXTComm {
             Boolean socketEstablished = connectQueue.take();//blocking call to wait for connection status
             Thread.yield();
 
-            boolean socketConnected = socketEstablished.booleanValue();
+            boolean socketConnected = socketEstablished;
             if (socketConnected) {
                 nxt.connectionState = (mode == LCP ? NXTConnectionState.LCP_CONNECTED : NXTConnectionState.PACKET_STREAM_CONNECTED);
             } else {
@@ -355,9 +356,8 @@ public class NXTCommAndroid implements NXTComm {
      *
      * @return read data
      */
-    public byte[] read() throws IOException {
-        //Log.d(TAG, "read called");
-        byte b[] = null;
+    public byte[] read() {
+        byte[] b = null;
 
         while (b == null) {
             b = mReadQueue.poll();
@@ -366,9 +366,9 @@ public class NXTCommAndroid implements NXTComm {
         return b;
     }
 
-    public NXTInfo[] search(String name) throws NXTCommException {
-        nxtInfos = new Vector<NXTInfo>();
-        devices = new Vector<BluetoothDevice>();
+    public NXTInfo[] search(String name) {
+        nxtInfos = new Vector<>();
+        devices = new Vector<>();
         mBtAdapter = BluetoothAdapter.getDefaultAdapter();
         // Get a set of currently paired devices
         Set<BluetoothDevice> pairedDevices = mBtAdapter.getBondedDevices();
@@ -393,8 +393,6 @@ public class NXTCommAndroid implements NXTComm {
             nxtInfo.protocol = NXTCommFactory.BLUETOOTH;
 
             if (name == null || name.equals(nxtInfo.name)) {
-
-                //Log.d(TAG, "adding " + d.getName());
                 nxtInfos.addElement(nxtInfo);
             }
         }
@@ -428,12 +426,12 @@ public class NXTCommAndroid implements NXTComm {
         return b;
     }
 
-    public synchronized void startIOThreads(BluetoothSocket socket, BluetoothDevice device) {
+    private synchronized void startIOThreads(BluetoothSocket socket, BluetoothDevice device) {
 
         cancelIOThreads();
 
-        mReadQueue = new LinkedBlockingQueue<byte[]>();
-        mWriteQueue = new LinkedBlockingQueue<byte[]>();
+        mReadQueue = new LinkedBlockingQueue<>();
+        mWriteQueue = new LinkedBlockingQueue<>();
 
         mWriteThread = new WriteThread(socket, mWriteQueue);
         mReadThread = new ReadThread(socket, mReadQueue);
@@ -443,7 +441,7 @@ public class NXTCommAndroid implements NXTComm {
     }
 
     public String stripColons(String s) {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
 
         for (int i = 0; i < s.length(); i++) {
             char c = s.charAt(i);
@@ -464,7 +462,7 @@ public class NXTCommAndroid implements NXTComm {
      *
      * @param data Data to send.
      */
-    public void write(byte[] data) throws IOException {
+    public void write(byte[] data) {
 
         try {
             if (data != null) {

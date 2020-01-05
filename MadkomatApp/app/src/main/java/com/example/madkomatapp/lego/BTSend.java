@@ -11,35 +11,18 @@ import lejos.pc.comm.NXTCommLogListener;
 import lejos.pc.comm.NXTConnector;
 
 public class BTSend extends Thread {
-    static final String TAG = "BTSend";
+    private static final String TAG = "BTSend";
     private NXTConnector conn;
-    DataOutputStream dos;
-    DataInputStream dis;
 
     private static final int PROCEED = 8;
     private static final int SUCCESS = 16;
 
-    public static enum CONN_TYPE {
+    public enum CONN_TYPE {
         LEJOS_PACKET, LEGO_LCP
     }
 
     public BTSend() {
         super();
-    }
-
-    public void closeConnection() {
-        try {
-            Log.d(TAG, "BTSend run loop finished and closing");
-
-            dis.close();
-            dos.close();
-            conn.getNXTComm().close();
-        } catch (Exception e) {
-        } finally {
-            dis = null;
-            dos = null;
-            conn = null;
-        }
     }
 
     public static NXTConnector connect(final CONN_TYPE connection_type) {
@@ -77,10 +60,10 @@ public class BTSend extends Thread {
 
         conn = connect(CONN_TYPE.LEJOS_PACKET);
 
-        dos = new DataOutputStream(conn.getOutputStream());
-        dis = new DataInputStream(conn.getInputStream());
-
-        try {
+        try (
+                DataOutputStream dos = new DataOutputStream(conn.getOutputStream());
+                DataInputStream dis = new DataInputStream(conn.getInputStream())
+        ) {
             dos.writeInt(PROCEED);
             dos.flush();
             Log.i(TAG, "sent PROCEED signal");
@@ -90,9 +73,18 @@ public class BTSend extends Thread {
             }
         } catch (IOException e) {
             Log.e(TAG, "Error ... ", e);
+        } finally {
+            Log.i(TAG, "Closing bluetooth connection");
+
+            try {
+                conn.getNXTComm().close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            conn = null;
         }
 
-        closeConnection();
         Log.i(TAG, "BTSend finished it's run");
     }
 

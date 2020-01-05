@@ -9,23 +9,21 @@ public class CommTest {
 
     public static void main(String[] args) {
 
-        NXTConnection connection = null;
-
-        LCD.drawString("Press a button to start", 0, 1);
-        Button.waitForAnyPress();
         LCD.drawString("waiting for BT", 0, 1);
-        connection = Bluetooth.waitForConnection();
+        NXTConnection connection = Bluetooth.waitForConnection();
 
-        DataInputStream dataIn = connection.openDataInputStream();
-        DataOutputStream dataOut = connection.openDataOutputStream();
+        try (DataInputStream dataIn = connection.openDataInputStream();
+             DataOutputStream dataOut = connection.openDataOutputStream()) {
 
-        try {
             if (dataIn.readInt() == PROCEED) {
                 LCD.drawString("Received PROCEED signal", 0, 1);
-                Button.waitForAnyPress();
                 LCD.drawString("Sending SUCCESS signal", 0, 1);
                 dataOut.writeInt(SUCCESS);
+                dataOut.flush();
+                LCD.drawString("SUCCESS sent, press anything...", 0, 1);
+                Button.waitForAnyPress();
             }
+
         } catch (IOException e) {
             System.out.println(" write error " + e);
         }
