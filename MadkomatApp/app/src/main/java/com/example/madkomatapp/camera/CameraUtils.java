@@ -47,7 +47,7 @@ public class CameraUtils {
                 && ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
     }
 
-    public static Bitmap optimizeBitmap(int sampleSize, String filePath) {
+    public static Bitmap optimizeBitmap(String filePath) {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inMutable = true;
 
@@ -59,14 +59,8 @@ public class CameraUtils {
      * android:required="true" is used in manifest file
      */
     public static boolean isDeviceSupportCamera(Context context) {
-        if (context.getPackageManager().hasSystemFeature(
-                PackageManager.FEATURE_CAMERA)) {
-            // this device has a camera
-            return true;
-        } else {
-            // no camera on this device
-            return false;
-        }
+        return context.getPackageManager().hasSystemFeature(
+                PackageManager.FEATURE_CAMERA);
     }
 
     /**
@@ -113,21 +107,9 @@ public class CameraUtils {
     }
 
     public static void writeBitmapToFile(String path, Bitmap bitmap) {
-        File file = new File(path);
-        FileOutputStream fout = null;
-
-        try {
-            fout = new FileOutputStream(file);
+        try (FileOutputStream fout = new FileOutputStream(new File(path))) {
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fout);
-            fout.close();
-        } catch (IOException e) {
-        } finally {
-            if (fout != null) {
-                try {
-                    fout.close();
-                } catch (IOException e) {
-                }
-            }
+        } catch (IOException ignored) {
         }
     }
 

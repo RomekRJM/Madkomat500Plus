@@ -9,7 +9,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class RecognitionParser {
-    public static final List<Face> extractFaces(String doc) {
+    public static List<Face> extractFaces(String doc) {
         List<Face> faces = new ArrayList<>();
 
         try {

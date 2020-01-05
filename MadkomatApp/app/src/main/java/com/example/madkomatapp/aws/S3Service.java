@@ -27,7 +27,7 @@ public class S3Service extends Service {
     public final static String INTENT_FILE_PATH = "filePath";
     public final static String INTENT_TRANSFER_OPERATION = "transferOperation";
 
-    static Context context;
+    private static Context context;
 
     public enum TransferOperation implements Serializable {
         TRANSFER_OPERATION_UPLOAD, TRANSFER_OPERATION_DOWNLOAD
@@ -51,6 +51,7 @@ public class S3Service extends Service {
         final String filePath = intent.getStringExtra(INTENT_FILE_PATH);
         final String key = StringUtils.substringAfterLast(filePath, "/");
 
+        assert transferOperation != null;
         switch (transferOperation) {
             case TRANSFER_OPERATION_DOWNLOAD:
                 handleDownload(key, filePath);
@@ -61,11 +62,6 @@ public class S3Service extends Service {
         }
 
         return START_STICKY;
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
     }
 
     @Override
@@ -89,8 +85,8 @@ public class S3Service extends Service {
         protected String doInBackground(String... strings) {
             String key = strings[0];
             String filePath = strings[1];
-            Long retryInterval = Long.parseLong(strings[2]);
-            Long maxRetries = Long.parseLong(strings[3]);
+            long retryInterval = Long.parseLong(strings[2]);
+            long maxRetries = Long.parseLong(strings[3]);
 
             int retries = 0;
 
@@ -104,10 +100,10 @@ public class S3Service extends Service {
 
                 try {
                     Thread.sleep(retryInterval);
-                } catch (InterruptedException e) {
+                } catch (InterruptedException ignored) {
                 }
 
-            } while (retries < maxRetries);
+            } while (++retries < maxRetries);
 
             Log.d(TAG, "Downloading " + key);
             TransferObserver transferObserver = transferUtility.download(s3Bucket, key, new File(filePath));

@@ -17,6 +17,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -49,12 +50,12 @@ public class MainActivity extends AppCompatActivity {
     private static final int CAMERA_CAPTURE_IMAGE_REQUEST_CODE = 100;
 
     // key to store image path in savedInstance state
-    public static final String KEY_IMAGE_STORAGE_PATH = "image_path";
+    private static final String KEY_IMAGE_STORAGE_PATH = "image_path";
 
-    public static final int MEDIA_TYPE_IMAGE = 1;
+    private static final int MEDIA_TYPE_IMAGE = 1;
 
     // Bitmap sampling size
-    public static final int BITMAP_SAMPLE_SIZE = 8;
+    private static final int BITMAP_SAMPLE_SIZE = 8;
 
     // Gallery directory name to store the images
     public static final String GALLERY_DIRECTORY_NAME = "madkomat";
@@ -66,8 +67,6 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView txtDescription;
     private static ImagePreview imgPreview;
-    private Button btnCapturePicture;
-    private Button btnTestBTConnection;
 
     private final static String TAG = MainActivity.class.getSimpleName();
 
@@ -76,8 +75,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.content_main);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
 
         // Checking availability of the camera
         if (!CameraUtils.isDeviceSupportCamera(getApplicationContext())) {
@@ -90,8 +87,8 @@ public class MainActivity extends AppCompatActivity {
 
         txtDescription = findViewById(R.id.txt_desc);
         imgPreview = findViewById(R.id.imgPreview);
-        btnCapturePicture = findViewById(R.id.btnCapturePicture);
-        btnTestBTConnection = findViewById(R.id.btnTestBTConnection);
+        Button btnCapturePicture = findViewById(R.id.btnCapturePicture);
+        Button btnTestBTConnection = findViewById(R.id.btnTestBTConnection);
 
         btnCapturePicture.setOnClickListener(new View.OnClickListener() {
 
@@ -100,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
                 if (CameraUtils.checkPermissions(getApplicationContext())) {
                     captureImage();
                 } else {
-                    requestCameraPermission(MEDIA_TYPE_IMAGE);
+                    requestCameraPermission();
                 }
             }
         });
@@ -137,7 +134,7 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Requesting permissions using Dexter library
      */
-    private void requestCameraPermission(final int type) {
+    private void requestCameraPermission() {
         Dexter.withActivity(this)
                 .withPermissions(Manifest.permission.CAMERA,
                         Manifest.permission.WRITE_EXTERNAL_STORAGE)
@@ -184,7 +181,7 @@ public class MainActivity extends AppCompatActivity {
      * Saving stored image path to saved instance state
      */
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
 
         // save file url in bundle as it will be null on screen orientation
@@ -196,7 +193,7 @@ public class MainActivity extends AppCompatActivity {
      * Restoring image path from saved instance state
      */
     @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
 
         // get the file url
@@ -247,7 +244,7 @@ public class MainActivity extends AppCompatActivity {
 
             imgPreview.setVisibility(View.VISIBLE);
 
-            Bitmap bitmap = CameraUtils.optimizeBitmap(BITMAP_SAMPLE_SIZE, imageStoragePath);
+            Bitmap bitmap = CameraUtils.optimizeBitmap(imageStoragePath);
 
             imgPreview.setBackgroundImage(bitmap);
 
@@ -256,7 +253,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private static Bitmap drawRectOnTop(Bitmap bitmap, Face face) {
+    private static void drawRectOnTop(Bitmap bitmap, Face face) {
         Canvas canvas = new Canvas(bitmap);
         Paint paint = new Paint();
 
@@ -274,7 +271,6 @@ public class MainActivity extends AppCompatActivity {
         float rectHeight = (float)(face.getHeight() * bitmap.getHeight());
 
         canvas.drawRect(rectX, rectY, rectX + rectWidth, rectY + rectHeight, paint);
-        return bitmap;
     }
 
     private static String getJsonFilePath() {
@@ -313,7 +309,7 @@ public class MainActivity extends AppCompatActivity {
         if (TransferState.COMPLETED.equals(state) &&
                 S3Service.TransferOperation.TRANSFER_OPERATION_DOWNLOAD.equals(transferOperation)) {
 
-            Bitmap bitmap = CameraUtils.optimizeBitmap(BITMAP_SAMPLE_SIZE, imageStoragePath);
+            Bitmap bitmap = CameraUtils.optimizeBitmap(imageStoragePath);
             String response = "";
 
             try {

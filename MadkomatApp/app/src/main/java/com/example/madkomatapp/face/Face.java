@@ -2,14 +2,14 @@ package com.example.madkomatapp.face;
 
 public class Face {
 
-    double left;
-    double top;
-    double width;
-    double height;
-    boolean smiling;
-    double smilingConfidence;
-    int ageRangeLow;
-    int ageRangeHigh;
+    private final double left;
+    private final double top;
+    private final double width;
+    private final double height;
+    private final boolean smiling;
+    private final double smilingConfidence;
+    private final int ageRangeLow;
+    private final int ageRangeHigh;
 
     private static final int ADULT_THRESHOLD = 16;
     private static final double MIN_SMILING_CONFIDENCE = 60.0;
@@ -58,11 +58,10 @@ public class Face {
     }
 
     public boolean isSmilingKid() {
-        return isSmiling() && getSmilingConfidence() >= MIN_SMILING_CONFIDENCE
-                && getAgeRangeLow() <= ADULT_THRESHOLD && getAgeRangeHigh() <= ADULT_THRESHOLD;
+        return isSmiling() && getSmilingConfidence() >= MIN_SMILING_CONFIDENCE && isKid();
     }
 
-    public boolean isAdult() {
-        return getAgeRangeLow() > ADULT_THRESHOLD && getAgeRangeHigh() > ADULT_THRESHOLD;
+    public boolean isKid() {
+        return getAgeRangeLow() <= ADULT_THRESHOLD && getAgeRangeHigh() <= ADULT_THRESHOLD;
     }
 }

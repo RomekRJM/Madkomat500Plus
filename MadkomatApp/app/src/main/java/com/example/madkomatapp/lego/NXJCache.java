@@ -8,7 +8,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 public class NXJCache {
-    static final String TAG = "NXJCache";
+    private static final String TAG = "NXJCache";
 
     public static void setup() {
 
@@ -19,7 +19,6 @@ public class NXJCache {
             File mLeJOS_dir = new File(root + "/leJOS");
             if (!mLeJOS_dir.exists()) {
                 mLeJOS_dir.mkdir();
-
             }
             File mCacheFile = new File(root + "/leJOS/", androidCacheFile);
 

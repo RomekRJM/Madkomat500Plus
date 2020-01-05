@@ -12,7 +12,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
         android:layout_marginBottom="@dimen/activity_margin"
         android:layout_weight="1"
         android:orientation="vertical">
@@ -24,7 +24,7 @@
             android:gravity="center"
             android:padding="10dp"
             android:text="@string/preview_description"
-            android:textSize="15dp" />
+            android:textSize="15sp" />
 
         <!-- To display picture taken -->
         <com.example.madkomatapp.image.ImagePreview
@@ -61,7 +61,7 @@
             android:layout_weight="1"
             android:background="@color/colorPrimary"
             android:foreground="?attr/selectableItemBackground"
-            android:text="BT test"
+            android:text="@string/bt_test"
             android:textColor="@android:color/white"
             android:visibility="visible"
             />

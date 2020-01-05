@@ -12,7 +12,6 @@ import lejos.pc.comm.NXTConnector;
 
 public class BTSend extends Thread {
     private static final String TAG = "BTSend";
-    private NXTConnector conn;
 
     private static final int PROCEED = 8;
     private static final int SUCCESS = 16;
@@ -25,7 +24,7 @@ public class BTSend extends Thread {
         super();
     }
 
-    public static NXTConnector connect(final CONN_TYPE connection_type) {
+    private static NXTConnector connect(final CONN_TYPE connection_type) {
         Log.d(TAG, " about to add LEJOS listener ");
 
         NXTConnector conn = new NXTConnector();
@@ -58,7 +57,7 @@ public class BTSend extends Thread {
     public void run() {
         Log.d(TAG, "BTSend run");
 
-        conn = connect(CONN_TYPE.LEJOS_PACKET);
+        NXTConnector conn = connect(CONN_TYPE.LEJOS_PACKET);
 
         try (
                 DataOutputStream dos = new DataOutputStream(conn.getOutputStream());

@@ -17,12 +17,12 @@ import java.util.concurrent.SynchronousQueue;
 
 import static java.lang.Boolean.*;
 
-public class NXTCommAndroid implements NXTComm {
+class NXTCommAndroid implements NXTComm {
 
     private class ConnectThread extends Thread {
         private BluetoothSocket mmSocket;
         private final BluetoothDevice mmDevice;
-        private SynchronousQueue<Boolean> connectQueue;
+        private final SynchronousQueue<Boolean> connectQueue;
 
         ConnectThread(BluetoothDevice device, SynchronousQueue<Boolean> connectQueue) {
             mmDevice = device;
@@ -93,7 +93,7 @@ public class NXTCommAndroid implements NXTComm {
     }
 
     private class ReadThread extends Thread {
-        public InputStream is;
+        InputStream is;
         boolean running = true;
         LinkedBlockingQueue<byte[]> mReadQueue;
 
@@ -198,7 +198,7 @@ public class NXTCommAndroid implements NXTComm {
     }
 
     private class WriteThread extends Thread {
-        public OutputStream os;
+        OutputStream os;
         private boolean running = true;
         LinkedBlockingQueue<byte[]> mWriteQueueT;
 
@@ -244,14 +244,11 @@ public class NXTCommAndroid implements NXTComm {
         }
     }
 
-    private static Vector<BluetoothDevice> devices;
     private BluetoothAdapter mBtAdapter;
 
     private NXTInfo nxtInfo;
-    private static Vector<NXTInfo> nxtInfos;
 
     private final String TAG = "NXTCommAndroid >>>>";
-    private String mConnectedDeviceName;
 
     private ConnectThread mConnectThread;
     private ReadThread mReadThread;
@@ -261,8 +258,6 @@ public class NXTCommAndroid implements NXTComm {
 
     private LinkedBlockingQueue<byte[]> mReadQueue;
     private LinkedBlockingQueue<byte[]> mWriteQueue;
-
-    private SynchronousQueue<Boolean> connectQueue;
 
     public int available() {
         return 0;
@@ -291,7 +286,7 @@ public class NXTCommAndroid implements NXTComm {
         Log.d(TAG, "closing threads and socket");
         cancelIOThreads();
         cancelConnectThread();
-        mConnectedDeviceName = "";
+        String mConnectedDeviceName = "";
     }
 
     private byte[] concat(byte[] data1, byte[] data2) {
@@ -320,7 +315,7 @@ public class NXTCommAndroid implements NXTComm {
         if (mode == RAW)
             throw new NXTCommException("RAW mode not implemented");
         BluetoothDevice nxtDevice;
-        connectQueue = new SynchronousQueue<>();
+        SynchronousQueue<Boolean> connectQueue = new SynchronousQueue<>();
         if (mBtAdapter == null) {
             mBtAdapter = BluetoothAdapter.getDefaultAdapter();
         }
@@ -367,8 +362,8 @@ public class NXTCommAndroid implements NXTComm {
     }
 
     public NXTInfo[] search(String name) {
-        nxtInfos = new Vector<>();
-        devices = new Vector<>();
+        Vector<NXTInfo> nxtInfos = new Vector<>();
+        Vector<BluetoothDevice> devices = new Vector<>();
         mBtAdapter = BluetoothAdapter.getDefaultAdapter();
         // Get a set of currently paired devices
         Set<BluetoothDevice> pairedDevices = mBtAdapter.getBondedDevices();

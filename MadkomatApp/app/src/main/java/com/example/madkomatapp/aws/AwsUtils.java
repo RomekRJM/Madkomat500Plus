@@ -17,9 +17,9 @@ import org.json.JSONException;
 
 import java.util.concurrent.CountDownLatch;
 
-public class AwsUtils {
+class AwsUtils {
 
-    public static final String NAME = AwsUtils.class.getSimpleName();
+    private static final String NAME = AwsUtils.class.getSimpleName();
     private AWSCredentialsProvider mobileClient;
     private AmazonS3Client s3Client;
     private String s3Bucket;
@@ -63,7 +63,7 @@ public class AwsUtils {
         return mobileClient;
     }
 
-    public AmazonS3Client getS3Client(Context context) {
+    private AmazonS3Client getS3Client(Context context) {
         if (s3Client == null) {
             s3Client = new AmazonS3Client(getCredProvider(context));
             try {
