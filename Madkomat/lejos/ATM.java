@@ -5,44 +5,70 @@ import lejos.nxt.NXTRegulatedMotor;
 
 public class ATM implements ButtonListener {
 
-    private static final int HATCH_MOVEMENT_SPEED = 540;
-    private static final int HATCH_MOVEMENT_DURATION = 300;
-    private static final NXTRegulatedMotor HATCH_MOTOR = Motor.A;
-
-    private static final int BANKNOTE_ROLLER_MOVEMENT_SPEED = 360;
-    private static final int BANKNOTE_ROLLER_MOVEMENT_DURATION = 800;
-    private static final NXTRegulatedMotor BANKNOTE_ROLLER_MOTOR = Motor.C;
-
-    public void openHatch() {
-        rotateMotor(HATCH_MOTOR, HATCH_MOVEMENT_SPEED, false, HATCH_MOVEMENT_DURATION);
+    private enum StopBehaviour {
+        STOP, FLOAT, FLOAT_TO_STOP
     }
 
-    public void closeHatch() {
-        rotateMotor(HATCH_MOTOR, HATCH_MOVEMENT_SPEED, true, HATCH_MOVEMENT_DURATION);
-    }
+    private class MotorMovement {
+        private final int speed;
+        private final int duration;
+        private final boolean forward;
+        private final NXTRegulatedMotor motor;
+        private final StopBehaviour stopBehaviour;
 
-    public void passBanknotes() {
-        rotateMotor(BANKNOTE_ROLLER_MOTOR, BANKNOTE_ROLLER_MOVEMENT_SPEED, true,
-                BANKNOTE_ROLLER_MOVEMENT_DURATION);
-    }
-
-    public void rotateMotor(NXTRegulatedMotor motor, int speed, boolean forward, long timeInMilis) {
-        motor.setSpeed(speed);
-        if (forward) {
-            motor.forward();
-        } else {
-            motor.backward();
+        MotorMovement(int speed, int duration, boolean forward,
+                      NXTRegulatedMotor motor, StopBehaviour stopBehaviour) {
+            this.speed = speed;
+            this.duration = duration;
+            this.forward = forward;
+            this.motor = motor;
+            this.stopBehaviour = stopBehaviour;
         }
-        sleepCalmly(timeInMilis);
-        motor.stop();
+
+        public void perform() {
+            motor.setSpeed(speed);
+            if (forward) {
+                motor.forward();
+            } else {
+                motor.backward();
+            }
+
+            sleepCalmly(duration);
+
+            switch (stopBehaviour) {
+                default:
+                case STOP:
+                    motor.stop();
+                    break;
+                case FLOAT:
+                    motor.flt();
+                    break;
+                case FLOAT_TO_STOP:
+                    motor.flt();
+                    sleepCalmly(100);
+                    motor.stop();
+            }
+
+        }
     }
+
+    private final MotorMovement OPEN_HATCH =
+            new MotorMovement(540, 300, false, Motor.A, StopBehaviour.STOP);
+    private final MotorMovement CLOSE_HATCH =
+            new MotorMovement(540, 300, true, Motor.A, StopBehaviour.FLOAT_TO_STOP);
+    private final MotorMovement LOAD_BANKNOTE =
+            new MotorMovement(300, 300, false, Motor.C, StopBehaviour.FLOAT);
+    private final MotorMovement GIVE_BANKNOTE =
+            new MotorMovement(360, 1200, false, Motor.C, StopBehaviour.FLOAT);
 
     public void buttonPressed(Button button) {
         if (Button.ENTER.equals(button)) {
-            openHatch();
-            passBanknotes();
-            sleepCalmly(1000);
-            closeHatch();
+            OPEN_HATCH.perform();
+            GIVE_BANKNOTE.perform();
+            sleepCalmly(2500);
+            CLOSE_HATCH.perform();
+        } else if (Button.RIGHT.equals(button) || Button.LEFT.equals(button)) {
+            LOAD_BANKNOTE.perform();
         }
     }
 
@@ -59,6 +85,9 @@ public class ATM implements ButtonListener {
     public static void main(String[] args) {
         ATM atm = new ATM();
         Button.ENTER.addButtonListener(atm);
+        Button.RIGHT.addButtonListener(atm);
+        Button.LEFT.addButtonListener(atm);
+
         Button.ESCAPE.waitForPressAndRelease();
     }
 }
