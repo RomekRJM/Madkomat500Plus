@@ -20,7 +20,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferState;
 import com.amazonaws.util.IOUtils;
@@ -29,7 +28,7 @@ import com.example.madkomatapp.camera.CameraUtils;
 import com.example.madkomatapp.face.Face;
 import com.example.madkomatapp.face.RecognitionParser;
 import com.example.madkomatapp.image.ImagePreview;
-import com.example.madkomatapp.lego.BTSend;
+import com.example.madkomatapp.lego.BTClient;
 import com.example.madkomatapp.lego.NXJCache;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
@@ -106,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
-                new BTSend().start();
+                new BTClient().start();
             }
         });
 

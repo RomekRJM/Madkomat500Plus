@@ -10,8 +10,8 @@ import lejos.pc.comm.NXTComm;
 import lejos.pc.comm.NXTCommLogListener;
 import lejos.pc.comm.NXTConnector;
 
-public class BTSend extends Thread {
-    private static final String TAG = "BTSend";
+public class BTClient extends Thread {
+    private static final String TAG = "BTClient";
 
     private static final int PROCEED = 8;
     private static final int SUCCESS = 16;
@@ -20,7 +20,7 @@ public class BTSend extends Thread {
         LEJOS_PACKET, LEGO_LCP
     }
 
-    public BTSend() {
+    public BTClient() {
         super();
     }
 
@@ -55,7 +55,7 @@ public class BTSend extends Thread {
 
     @Override
     public void run() {
-        Log.d(TAG, "BTSend run");
+        Log.d(TAG, "BTClient run");
 
         NXTConnector conn = connect(CONN_TYPE.LEJOS_PACKET);
 
@@ -80,11 +80,9 @@ public class BTSend extends Thread {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
-            conn = null;
         }
 
-        Log.i(TAG, "BTSend finished it's run");
+        Log.i(TAG, "BTClient finished it's run");
     }
 
 }
