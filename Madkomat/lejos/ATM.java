@@ -60,7 +60,7 @@ public class ATM {
     private final MotorMovement loadBanknote =
             new MotorMovement(300, 300, false, Motor.C, StopBehaviour.FLOAT);
     private final MotorMovement giveBanknote =
-            new MotorMovement(360, 1200, false, Motor.C, StopBehaviour.FLOAT);
+            new MotorMovement(420, 1500, false, Motor.C, StopBehaviour.FLOAT);
 
     public void loadBanknotes() {
         loadBanknote.perform();
@@ -69,7 +69,7 @@ public class ATM {
     public void serve() {
         openHatch.perform();
         giveBanknote.perform();
-        sleepCalmly(2500);
+        sleepCalmly(5000);
         closeHatch.perform();
     }
 
