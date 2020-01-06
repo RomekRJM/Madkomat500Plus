@@ -1,15 +1,11 @@
-import org.omg.CORBA.UNKNOWN;
-
 import java.io.*;
 
 import lejos.nxt.*;
 import lejos.nxt.comm.*;
 
-public class CommTest {
+public class BTServer {
 
-    public Enum Signal
-
-    {
+    public enum Signal {
         PROCEED, SUCCESS, UNKNOWN
     }
 
@@ -17,25 +13,21 @@ public class CommTest {
 
     public void initConnection() {
         if (connection == null) {
-            connection = Bluetooth.waitForConnection()
+            connection = Bluetooth.waitForConnection();
         }
     }
 
     public void closeConnection() {
         if (connection == null) return;
-
-        try {
-            connection.close();
-        } catch (IOException ignored) {
-        } finally {
-            connection = null;
-        }
+        
+        connection.close();
+        connection = null;
     }
 
     public void sendSignalAndClose(Signal signal) {
         try (DataOutputStream dataOut = connection.openDataOutputStream()) {
             LCD.drawString("Sending " + signal.toString(), 0, 1);
-            dataOut.writeInt(signal);
+            dataOut.writeInt(signal.ordinal());
             dataOut.flush();
             LCD.drawString(signal.toString() + " sent", 0, 1);
         } catch (IOException e) {
@@ -44,8 +36,8 @@ public class CommTest {
     }
 
     public Signal receiveSignalAndClose() {
-        int received;
-        Signal receivedSignal;
+        int received = -1;
+        Signal receivedSignal = Signal.UNKNOWN;
         Signal[] signalValues = Signal.values();
 
         try (DataInputStream dataIn = connection.openDataInputStream()) {
@@ -55,10 +47,8 @@ public class CommTest {
             System.out.println("read error " + e);
         }
 
-        if (received >=0 && received < signalValues.length) {
+        if (received >= 0 && received < signalValues.length) {
             receivedSignal = signalValues[received];
-        } else {
-            receivedSignal = Signal.UNKNOWN;
         }
 
         LCD.drawString("Got " + receivedSignal.toString(), 0, 1);
