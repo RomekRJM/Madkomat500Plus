@@ -13,8 +13,9 @@ import lejos.pc.comm.NXTConnector;
 public class BTClient extends Thread {
     private static final String TAG = "BTClient";
 
-    private static final int PROCEED = 8;
-    private static final int SUCCESS = 16;
+    public enum Signal {
+        PROCEED, SUCCESS, UNKNOWN
+    }
 
     public enum CONN_TYPE {
         LEJOS_PACKET, LEGO_LCP
@@ -63,11 +64,11 @@ public class BTClient extends Thread {
                 DataOutputStream dos = new DataOutputStream(conn.getOutputStream());
                 DataInputStream dis = new DataInputStream(conn.getInputStream())
         ) {
-            dos.writeInt(PROCEED);
+            dos.writeInt(Signal.PROCEED.ordinal());
             dos.flush();
             Log.i(TAG, "sent PROCEED signal");
 
-            if (dis.readInt() == SUCCESS) {
+            if (dis.readInt() == Signal.SUCCESS.ordinal()) {
                 Log.i(TAG, "got SUCCESS message");
             }
         } catch (IOException e) {
