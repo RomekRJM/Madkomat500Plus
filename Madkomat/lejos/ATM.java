@@ -16,7 +16,7 @@ public class ATM {
         private final NXTRegulatedMotor motor;
         private final StopBehaviour stopBehaviour;
 
-        public MotorMovement(int speed, int duration, boolean forward,
+        MotorMovement(int speed, int duration, boolean forward,
                              NXTRegulatedMotor motor, StopBehaviour stopBehaviour) {
             this.speed = speed;
             this.duration = duration;
@@ -53,24 +53,24 @@ public class ATM {
         }
     }
 
-    private final MotorMovement OPEN_HATCH =
+    private final MotorMovement openHatch =
             new MotorMovement(540, 300, false, Motor.A, StopBehaviour.STOP);
-    private final MotorMovement CLOSE_HATCH =
+    private final MotorMovement closeHatch =
             new MotorMovement(540, 300, true, Motor.A, StopBehaviour.STOP_TO_FLOAT);
-    private final MotorMovement LOAD_BANKNOTE =
+    private final MotorMovement loadBanknote =
             new MotorMovement(300, 300, false, Motor.C, StopBehaviour.FLOAT);
-    private final MotorMovement GIVE_BANKNOTE =
+    private final MotorMovement giveBanknote =
             new MotorMovement(360, 1200, false, Motor.C, StopBehaviour.FLOAT);
 
     public void loadBanknotes() {
-        LOAD_BANKNOTE.perform();
+        loadBanknote.perform();
     }
 
     public void serve() {
-        OPEN_HATCH.perform();
-        GIVE_BANKNOTE.perform();
+        openHatch.perform();
+        giveBanknote.perform();
         sleepCalmly(2500);
-        CLOSE_HATCH.perform();
+        closeHatch.perform();
     }
 
     public static void sleepCalmly(long millis) {

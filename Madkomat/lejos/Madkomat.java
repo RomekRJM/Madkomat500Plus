@@ -7,7 +7,7 @@ public class Madkomat implements ButtonListener {
 
     private final ATM atm;
     private final BTServer btServer;
-    private static final String EMPTY_LINE = "             ";
+    private static final String EMPTY_LINE = "                ";
 
     public Madkomat() {
         atm = new ATM();
@@ -34,8 +34,9 @@ public class Madkomat implements ButtonListener {
 
         while(true) {
             clearScreen();
-            LCD.drawString("Awaiting connection...", 0, 2);
-            LCD.drawString("ESCAPE to exit", 0, 4);
+            LCD.drawString("Awaiting conn.", 0, 2);
+            LCD.drawString("ESCAPE to exit.", 0, 4);
+            LCD.drawString("L/R load banknt.", 0, 5);
 
             btServer.initConnection();
 
