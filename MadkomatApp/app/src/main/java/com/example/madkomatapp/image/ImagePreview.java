@@ -14,6 +14,7 @@ import androidx.appcompat.widget.AppCompatImageView;
 public class ImagePreview extends AppCompatImageView {
     private final String PROPERTY_RADIUS = "radius";
     private final String PROPERTY_ANGLE = "angle";
+    private final String PROPERTY_ANGLE2 = "angle2";
     private final String PROPERTY_RECTANGLE_POSITION = "rectangle_position";
     private final String PROPERTY_RECTANGLE_HEIGHT_SCALE = "rectangle_height_scale";
     private final String PROPERTY_RECTANGLE_WIDTH_SCALE = "rectangle_width_scale";
@@ -35,9 +36,10 @@ public class ImagePreview extends AppCompatImageView {
 
     private int radius;
     private int angle;
+    private int angle2;
     private float rectangleHeightScale;
     private float rectangleWidthScale;
-    private int rectanglePosition;
+    private float rectangleOrbitRadius;
 
     private Bitmap bitmap;
 
@@ -91,8 +93,12 @@ public class ImagePreview extends AppCompatImageView {
         int halfRectangleWidth = Math.round(rectSize / (rectangleWidthScale * 2));
         int halfRectangleHeight = Math.round(rectSize / (rectangleHeightScale * 2));
 
-        canvas.drawRect(viewWidth - halfRectangleWidth, viewHeight - halfRectangleHeight,
-                viewWidth + halfRectangleWidth, viewHeight + halfRectangleHeight,
+        double angleRad = Math.toRadians(angle2);
+        int xShift = (int) Math.round(rectangleOrbitRadius * viewWidth / 6 * Math.cos(angleRad));
+        int yShift = (int) Math.round(rectangleOrbitRadius * viewHeight / 7 * Math.sin(angleRad));
+
+        canvas.drawRect(xShift + viewWidth - halfRectangleWidth, yShift + viewHeight - halfRectangleHeight,
+                xShift + viewWidth + halfRectangleWidth, yShift + viewHeight + halfRectangleHeight,
                 rectanglePaint);
     }
 
@@ -103,12 +109,13 @@ public class ImagePreview extends AppCompatImageView {
     public void startAnimator() {
         PropertyValuesHolder propertyRadius = PropertyValuesHolder.ofInt(PROPERTY_RADIUS, 0, 150);
         PropertyValuesHolder propertyAngle = PropertyValuesHolder.ofInt(PROPERTY_ANGLE, 0, 720);
-        PropertyValuesHolder propertyRectanglePosition = PropertyValuesHolder.ofInt(PROPERTY_RECTANGLE_POSITION, 0, 1000);
+        PropertyValuesHolder propertyAngle2 = PropertyValuesHolder.ofInt(PROPERTY_ANGLE2, 180, 1080);
+        PropertyValuesHolder propertyRectanglePosition = PropertyValuesHolder.ofFloat(PROPERTY_RECTANGLE_POSITION, 5f, 0f);
         PropertyValuesHolder propertyRectangleHeight = PropertyValuesHolder.ofFloat(PROPERTY_RECTANGLE_HEIGHT_SCALE, 2.3f, 3.5f);
         PropertyValuesHolder propertyRectangleWidth = PropertyValuesHolder.ofFloat(PROPERTY_RECTANGLE_WIDTH_SCALE, 3.5f, 2.3f);
 
         ValueAnimator animator = new ValueAnimator();
-        animator.setValues(propertyRadius, propertyAngle,
+        animator.setValues(propertyRadius, propertyAngle, propertyAngle2,
                 propertyRectanglePosition, propertyRectangleHeight, propertyRectangleWidth);
         animator.setDuration(8000);
         animator.setRepeatCount(ValueAnimator.INFINITE);
@@ -118,7 +125,8 @@ public class ImagePreview extends AppCompatImageView {
             public void onAnimationUpdate(ValueAnimator animation) {
                 radius = (int) animation.getAnimatedValue(PROPERTY_RADIUS);
                 angle = (int) animation.getAnimatedValue(PROPERTY_ANGLE);
-                rectanglePosition = (int) animation.getAnimatedValue(PROPERTY_RECTANGLE_POSITION);
+                angle2 = (int) animation.getAnimatedValue(PROPERTY_ANGLE2);
+                rectangleOrbitRadius = (float) animation.getAnimatedValue(PROPERTY_RECTANGLE_POSITION);
                 rectangleHeightScale = (float) animation.getAnimatedValue(PROPERTY_RECTANGLE_HEIGHT_SCALE);
                 rectangleWidthScale = (float) animation.getAnimatedValue(PROPERTY_RECTANGLE_WIDTH_SCALE);
 
