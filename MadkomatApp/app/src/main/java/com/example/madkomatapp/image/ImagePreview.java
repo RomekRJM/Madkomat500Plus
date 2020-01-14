@@ -12,7 +12,6 @@ import androidx.appcompat.widget.AppCompatImageView;
 
 
 public class ImagePreview extends AppCompatImageView {
-    private final String PROPERTY_RADIUS = "radius";
     private final String PROPERTY_ANGLE = "angle";
     private final String PROPERTY_ANGLE2 = "angle2";
     private final String PROPERTY_RECTANGLE_POSITION = "rectangle_position";
@@ -34,7 +33,6 @@ public class ImagePreview extends AppCompatImageView {
     private int circleRightBotX;
     private int circleRightBotY;
 
-    private int radius;
     private int angle;
     private int angle2;
     private float rectangleHeightScale;
@@ -47,10 +45,10 @@ public class ImagePreview extends AppCompatImageView {
         super(context, attributeSet);
 
         circlePaint.setColor(0xffaa44ff);
-        rectanglePaint.setColor(0x998888e8);
+        rectanglePaint.setColor(0x576888ff);
 
-        sizeRect = 40;
-        circleRadius = 140;
+        sizeRect = 20;
+        circleRadius = 40;
         numberOfCircles = 8;
         spread = 360.0 / numberOfCircles;
 
@@ -61,8 +59,8 @@ public class ImagePreview extends AppCompatImageView {
         viewHeight = getHeight() / 2;
 
         drawBitmap(canvas);
-        drawLoadingIcon(canvas);
         drawMovingRectangle(canvas);
+        drawLoadingIcon(canvas);
     }
 
     private void drawBitmap(Canvas canvas) {
@@ -72,10 +70,10 @@ public class ImagePreview extends AppCompatImageView {
     }
 
     private void drawLoadingIcon(Canvas canvas) {
-        circleLeftTopX = viewWidth - sizeRect;
-        circleLeftTopY = viewHeight - sizeRect;
-        circleRightBotX = viewWidth + sizeRect;
-        circleRightBotY = viewHeight + sizeRect;
+        circleLeftTopX = circleRadius;
+        circleLeftTopY = circleRadius;
+        circleRightBotX = circleRadius + sizeRect;
+        circleRightBotY = circleRadius + sizeRect;
 
         for (int i = 0; i < numberOfCircles; ++i) {
             double angleRad = Math.toRadians(i * spread + angle);
@@ -84,7 +82,7 @@ public class ImagePreview extends AppCompatImageView {
 
             canvas.drawRoundRect(circleLeftTopX + xShift, circleLeftTopY + yShift,
                     circleRightBotX + xShift, circleRightBotY + yShift,
-                    radius, radius, circlePaint);
+                    90, 90, circlePaint);
         }
     }
 
@@ -113,7 +111,6 @@ public class ImagePreview extends AppCompatImageView {
     }
 
     public void startAnimator() {
-        PropertyValuesHolder propertyRadius = PropertyValuesHolder.ofInt(PROPERTY_RADIUS, 0, 150);
         PropertyValuesHolder propertyAngle = PropertyValuesHolder.ofInt(PROPERTY_ANGLE, 0, 720);
         PropertyValuesHolder propertyAngle2 = PropertyValuesHolder.ofInt(PROPERTY_ANGLE2, 180, 1080);
         PropertyValuesHolder propertyRectanglePosition = PropertyValuesHolder.ofFloat(PROPERTY_RECTANGLE_POSITION, 5f, 0f);
@@ -121,7 +118,7 @@ public class ImagePreview extends AppCompatImageView {
         PropertyValuesHolder propertyRectangleWidth = PropertyValuesHolder.ofFloat(PROPERTY_RECTANGLE_WIDTH_SCALE, 3.5f, 2.3f);
 
         ValueAnimator animator = new ValueAnimator();
-        animator.setValues(propertyRadius, propertyAngle, propertyAngle2,
+        animator.setValues(propertyAngle, propertyAngle2,
                 propertyRectanglePosition, propertyRectangleHeight, propertyRectangleWidth);
         animator.setDuration(8000);
         animator.setRepeatCount(ValueAnimator.INFINITE);
@@ -129,7 +126,6 @@ public class ImagePreview extends AppCompatImageView {
         animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
-                radius = (int) animation.getAnimatedValue(PROPERTY_RADIUS);
                 angle = (int) animation.getAnimatedValue(PROPERTY_ANGLE);
                 angle2 = (int) animation.getAnimatedValue(PROPERTY_ANGLE2);
                 rectangleOrbitRadius = (float) animation.getAnimatedValue(PROPERTY_RECTANGLE_POSITION);
