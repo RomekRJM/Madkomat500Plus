@@ -220,7 +220,7 @@ public class MainActivity extends AppCompatActivity {
                 beginTransferInBackground(S3Service.TransferOperation.TRANSFER_OPERATION_DOWNLOAD,
                         getJsonFilePath());
 
-                imgPreview.startAnimator();
+                imgPreview.startAnimators();
 
 
             } else if (resultCode == RESULT_CANCELED) {

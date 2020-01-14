@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.util.AttributeSet;
+import android.view.animation.LinearInterpolator;
 
 import androidx.appcompat.widget.AppCompatImageView;
 
@@ -110,31 +111,44 @@ public class ImagePreview extends AppCompatImageView {
         this.bitmap = bitmap;
     }
 
-    public void startAnimator() {
-        PropertyValuesHolder propertyAngle = PropertyValuesHolder.ofInt(PROPERTY_ANGLE, 0, 720);
+    public void startAnimators() {
         PropertyValuesHolder propertyAngle2 = PropertyValuesHolder.ofInt(PROPERTY_ANGLE2, 180, 1080);
         PropertyValuesHolder propertyRectanglePosition = PropertyValuesHolder.ofFloat(PROPERTY_RECTANGLE_POSITION, 5f, 0f);
         PropertyValuesHolder propertyRectangleHeight = PropertyValuesHolder.ofFloat(PROPERTY_RECTANGLE_HEIGHT_SCALE, 2.3f, 3.5f);
         PropertyValuesHolder propertyRectangleWidth = PropertyValuesHolder.ofFloat(PROPERTY_RECTANGLE_WIDTH_SCALE, 3.5f, 2.3f);
 
-        ValueAnimator animator = new ValueAnimator();
-        animator.setValues(propertyAngle, propertyAngle2,
-                propertyRectanglePosition, propertyRectangleHeight, propertyRectangleWidth);
-        animator.setDuration(8000);
-        animator.setRepeatCount(ValueAnimator.INFINITE);
-        animator.setRepeatMode(ValueAnimator.REVERSE);
-        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+        ValueAnimator rectangleAnimator = new ValueAnimator();
+        rectangleAnimator.setValues(propertyAngle2, propertyRectanglePosition,
+                propertyRectangleHeight, propertyRectangleWidth);
+        rectangleAnimator.setDuration(8000);
+        rectangleAnimator.setRepeatCount(ValueAnimator.INFINITE);
+        rectangleAnimator.setRepeatMode(ValueAnimator.REVERSE);
+        rectangleAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
-                angle = (int) animation.getAnimatedValue(PROPERTY_ANGLE);
                 angle2 = (int) animation.getAnimatedValue(PROPERTY_ANGLE2);
                 rectangleOrbitRadius = (float) animation.getAnimatedValue(PROPERTY_RECTANGLE_POSITION);
                 rectangleHeightScale = (float) animation.getAnimatedValue(PROPERTY_RECTANGLE_HEIGHT_SCALE);
                 rectangleWidthScale = (float) animation.getAnimatedValue(PROPERTY_RECTANGLE_WIDTH_SCALE);
-
                 invalidate();
             }
         });
-        animator.start();
+        rectangleAnimator.start();
+
+        PropertyValuesHolder propertyAngle = PropertyValuesHolder.ofInt(PROPERTY_ANGLE, 0, 2160);
+
+        ValueAnimator circleAnimator = new ValueAnimator();
+        circleAnimator.setInterpolator(new LinearInterpolator());
+        circleAnimator.setValues(propertyAngle);
+        circleAnimator.setDuration(15000);
+        circleAnimator.setRepeatCount(ValueAnimator.INFINITE);
+        circleAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                angle = (int) animation.getAnimatedValue(PROPERTY_ANGLE);
+                invalidate();
+            }
+        });
+        circleAnimator.start();
     }
 }
