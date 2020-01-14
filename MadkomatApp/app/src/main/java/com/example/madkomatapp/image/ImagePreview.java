@@ -47,7 +47,7 @@ public class ImagePreview extends AppCompatImageView {
         super(context, attributeSet);
 
         circlePaint.setColor(0xffaa44ff);
-        rectanglePaint.setColor(0x998888d8);
+        rectanglePaint.setColor(0x998888e8);
 
         sizeRect = 40;
         circleRadius = 140;
@@ -97,9 +97,15 @@ public class ImagePreview extends AppCompatImageView {
         int xShift = (int) Math.round(rectangleOrbitRadius * viewWidth / 6 * Math.cos(angleRad));
         int yShift = (int) Math.round(rectangleOrbitRadius * viewHeight / 7 * Math.sin(angleRad));
 
-        canvas.drawRect(xShift + viewWidth - halfRectangleWidth, yShift + viewHeight - halfRectangleHeight,
-                xShift + viewWidth + halfRectangleWidth, yShift + viewHeight + halfRectangleHeight,
-                rectanglePaint);
+        int left = xShift + viewWidth - halfRectangleWidth;
+        int top = yShift + viewHeight - halfRectangleHeight;
+        int right = xShift + viewWidth + halfRectangleWidth;
+        int bottom = yShift + viewHeight + halfRectangleHeight;
+
+        canvas.drawRect(0, 0, left, getHeight(), rectanglePaint);
+        canvas.drawRect(0, 0, getWidth(), top, rectanglePaint);
+        canvas.drawRect(right, 0, getWidth(), getHeight(), rectanglePaint);
+        canvas.drawRect(0, bottom, getWidth(), getHeight(), rectanglePaint);
     }
 
     public void setBackgroundImage(Bitmap bitmap) {
