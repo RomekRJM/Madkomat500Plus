@@ -9,6 +9,7 @@ public class PathTracer {
 
     public PathTracer(Point[] points) {
         this.points = points;
+        this.distances = new double[points.length - 1];
         this.totalDistance = 0;
 
         initDistances();
@@ -29,6 +30,18 @@ public class PathTracer {
     }
 
     public Point getCoordinateAlongThePath(double percent) {
+
+        double targetDistance = this.totalDistance * percent / 100.0;
+        double distance = 0;
+
+        for (int i = 0; i < points.length - 1; ++i) {
+            if (distance + distances[i] < targetDistance) {
+                distance += distances[i];
+            } else {
+                break;
+            }
+        }
+
         return new Point(0, 0);
     }
 }
