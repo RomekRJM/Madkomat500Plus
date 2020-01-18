@@ -258,16 +258,16 @@ public class MainActivity extends AppCompatActivity {
 
         int color = Color.argb(128, 255, 0, 0);
 
-        if(face.isSmilingKid()) {
+        if (face.isSmilingKid()) {
             color = Color.argb(128, 0, 255, 0);
         }
 
         paint.setColor(color);
 
-        float rectX = (float)(face.getLeft() * bitmap.getWidth());
-        float rectY = (float)(face.getTop() * bitmap.getHeight());
-        float rectWidth = (float)(face.getWidth() * bitmap.getWidth());
-        float rectHeight = (float)(face.getHeight() * bitmap.getHeight());
+        float rectX = (float) (face.getLeft() * bitmap.getWidth());
+        float rectY = (float) (face.getTop() * bitmap.getHeight());
+        float rectWidth = (float) (face.getWidth() * bitmap.getWidth());
+        float rectHeight = (float) (face.getHeight() * bitmap.getHeight());
 
         canvas.drawRect(rectX, rectY, rectX + rectWidth, rectY + rectHeight, paint);
     }
@@ -319,7 +319,7 @@ public class MainActivity extends AppCompatActivity {
 
             List<Face> faces = RecognitionParser.extractFaces(response);
 
-            for(Face face : faces) {
+            for (Face face : faces) {
                 drawRectOnTop(bitmap, face);
             }
 

@@ -1,15 +1,15 @@
 package com.example.madkomatapp.image;
 
-import android.graphics.Point;
+import android.graphics.PointF;
 
 import java.util.Arrays;
 
-public class PathTracer {
-    private final Point[] points;
+class PathTracer {
+    private final PointF[] points;
     private double[] distances;
     private double totalDistance;
 
-    public PathTracer(Point[] pts) {
+    PathTracer(PointF[] pts) {
         this.points = closePath(pts);
         this.distances = new double[points.length - 1];
         this.totalDistance = 0;
@@ -17,39 +17,39 @@ public class PathTracer {
         initDistances();
     }
 
-    private Point[] closePath(Point[] points) {
+    private PointF[] closePath(PointF[] points) {
         if (points[0].equals(points[points.length - 1])) {
             return points;
         }
 
-        Point[] closed = Arrays.copyOf(points, points.length + 1);
+        PointF[] closed = Arrays.copyOf(points, points.length + 1);
         closed[points.length] = points[0];
         return closed;
     }
 
     private void initDistances() {
         for (int i = 0; i < points.length - 1; ++i) {
-            Point current = points[i];
-            Point next = points[i + 1];
+            PointF current = points[i];
+            PointF next = points[i + 1];
 
             distances[i] = Math.sqrt(
-                    Math.pow((double) next.x - (double) current.x, 2.0)
-                            + Math.pow((double) next.y - (double) current.y, 2.0)
+                    Math.pow(next.x - current.x, 2.0)
+                            + Math.pow(next.y - current.y, 2.0)
             );
 
             totalDistance += distances[i];
         }
     }
 
-    public Point getCoordinateAlongThePath(double percent) {
+    PointF getCoordinateAlongThePath(double percent) {
         validate(percent);
 
-        double targetDistance = totalDistance * percent / 100.0;
+        double targetDistance = totalDistance * percent / 100.0f;
         double distance = 0.0;
         int current;
 
-        for (current = 0; current < points.length - 1; ++current) {
-            if (distance + distances[current] - targetDistance < 0.001) {
+        for (current = 0; current < distances.length - 1; ++current) {
+            if (distance + distances[current] - targetDistance < 0.00001) {
                 distance += distances[current];
             } else {
                 break;
@@ -63,10 +63,10 @@ public class PathTracer {
 
         double xDifference = (double) points[next].x - (double) points[current].x;
         double yDifference = (double) points[next].y - (double) points[current].y;
-        int x = (int) Math.round(points[current].x + coefficient * xDifference);
-        int y = (int) Math.round(points[current].y + coefficient * yDifference);
+        double x = points[current].x + coefficient * xDifference;
+        double y = points[current].y + coefficient * yDifference;
 
-        return new Point(x, y);
+        return new PointF((float)x, (float)y);
     }
 
     private void validate(double percent) {

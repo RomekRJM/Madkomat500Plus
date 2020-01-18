@@ -6,6 +6,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.PointF;
 import android.util.AttributeSet;
 import android.view.animation.LinearInterpolator;
 
@@ -41,6 +42,7 @@ public class ImagePreview extends AppCompatImageView {
     private float rectangleOrbitRadius;
 
     private Bitmap bitmap;
+    private PathTracer pathTracer;
 
     public ImagePreview(Context context, AttributeSet attributeSet) {
         super(context, attributeSet);
@@ -53,6 +55,10 @@ public class ImagePreview extends AppCompatImageView {
         numberOfCircles = 8;
         spread = 360.0 / numberOfCircles;
 
+        pathTracer = new PathTracer(new PointF[]{
+                new PointF(0.2f, 0.2f), new PointF(0.4f, 0.8f), new PointF(0.37f, 0.2f),
+                new PointF(0.2f, 0.5f), new PointF(0.5f, 0.16f), new PointF(0.8f, 0.8f)
+        });
     }
 
     protected void onDraw(Canvas canvas) {
@@ -92,14 +98,17 @@ public class ImagePreview extends AppCompatImageView {
         int halfRectangleWidth = Math.round(rectSize / (rectangleWidthScale * 2));
         int halfRectangleHeight = Math.round(rectSize / (rectangleHeightScale * 2));
 
-        double angleRad = Math.toRadians(angle2);
-        int xShift = (int) Math.round(rectangleOrbitRadius * viewWidth / 6 * Math.cos(angleRad));
-        int yShift = (int) Math.round(rectangleOrbitRadius * viewHeight / 7 * Math.sin(angleRad));
+        //double angleRad = Math.toRadians(angle2);
+        //int xShift = (int) Math.round(rectangleOrbitRadius * viewWidth / 6 * Math.cos(angleRad));
+        //int yShift = (int) Math.round(rectangleOrbitRadius * viewHeight / 7 * Math.sin(angleRad));
+        PointF coordinate = pathTracer.getCoordinateAlongThePath(rectangleOrbitRadius);
+        int xShift = Math.round(getWidth() * coordinate.x);
+        int yShift = Math.round(getHeight()  * coordinate.y);
 
-        int left = xShift + viewWidth - halfRectangleWidth;
-        int top = yShift + viewHeight - halfRectangleHeight;
-        int right = xShift + viewWidth + halfRectangleWidth;
-        int bottom = yShift + viewHeight + halfRectangleHeight;
+        int left = xShift - halfRectangleWidth;
+        int top = yShift - halfRectangleHeight;
+        int right = xShift + halfRectangleWidth;
+        int bottom = yShift + halfRectangleHeight;
 
         canvas.drawRect(0, 0, left, getHeight(), rectanglePaint);
         canvas.drawRect(0, 0, getWidth(), top, rectanglePaint);
@@ -113,7 +122,7 @@ public class ImagePreview extends AppCompatImageView {
 
     public void startAnimators() {
         PropertyValuesHolder propertyAngle2 = PropertyValuesHolder.ofInt(PROPERTY_ANGLE2, 180, 1080);
-        PropertyValuesHolder propertyRectanglePosition = PropertyValuesHolder.ofFloat(PROPERTY_RECTANGLE_POSITION, 5f, 0f);
+        PropertyValuesHolder propertyRectanglePosition = PropertyValuesHolder.ofFloat(PROPERTY_RECTANGLE_POSITION, 0f, 100f);
         PropertyValuesHolder propertyRectangleHeight = PropertyValuesHolder.ofFloat(PROPERTY_RECTANGLE_HEIGHT_SCALE, 2.3f, 3.5f);
         PropertyValuesHolder propertyRectangleWidth = PropertyValuesHolder.ofFloat(PROPERTY_RECTANGLE_WIDTH_SCALE, 3.5f, 2.3f);
 
