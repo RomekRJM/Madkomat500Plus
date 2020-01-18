@@ -2,17 +2,29 @@ package com.example.madkomatapp.image;
 
 import android.graphics.Point;
 
+import java.util.Arrays;
+
 public class PathTracer {
     private final Point[] points;
     private double[] distances;
     private double totalDistance;
 
-    public PathTracer(Point[] points) {
-        this.points = points;
+    public PathTracer(Point[] pts) {
+        this.points = closePath(pts);
         this.distances = new double[points.length - 1];
         this.totalDistance = 0;
 
         initDistances();
+    }
+
+    private Point[] closePath(Point[] points) {
+        if (points[0].equals(points[points.length - 1])) {
+            return points;
+        }
+
+        Point[] closed = Arrays.copyOf(points, points.length + 1);
+        closed[points.length] = points[0];
+        return closed;
     }
 
     private void initDistances() {
@@ -30,6 +42,7 @@ public class PathTracer {
     }
 
     public Point getCoordinateAlongThePath(double percent) {
+        validate(percent);
 
         double targetDistance = totalDistance * percent / 100.0;
         double distance = 0.0;
@@ -46,7 +59,7 @@ public class PathTracer {
         int next = current + 1;
 
         double remainingPercentage = percent - distance * 100 / totalDistance;
-        double coefficient = remainingPercentage * totalDistance / distances[next];
+        double coefficient = remainingPercentage / 100 * totalDistance / distances[current];
 
         double xDifference = (double) points[next].x - (double) points[current].x;
         double yDifference = (double) points[next].y - (double) points[current].y;
@@ -56,11 +69,9 @@ public class PathTracer {
         return new Point(x, y);
     }
 
-    public static void main(String[] s) {
-        PathTracer pt = new PathTracer(new Point[]{
-                new Point(0, 0), new Point(5, 0), new Point(10, 0)
-        });
-
-        System.out.println(pt.getCoordinateAlongThePath(0.6).toString());
+    private void validate(double percent) {
+        if (percent < 0.0 && percent > 100.0) {
+            throw new IllegalArgumentException("percent should be in (0, 100) range, was " + percent);
+        }
     }
 }
