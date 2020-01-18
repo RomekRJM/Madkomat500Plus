@@ -31,17 +31,36 @@ public class PathTracer {
 
     public Point getCoordinateAlongThePath(double percent) {
 
-        double targetDistance = this.totalDistance * percent / 100.0;
-        double distance = 0;
+        double targetDistance = totalDistance * percent / 100.0;
+        double distance = 0.0;
+        int current;
 
-        for (int i = 0; i < points.length - 1; ++i) {
-            if (distance + distances[i] < targetDistance) {
-                distance += distances[i];
+        for (current = 0; current < points.length - 1; ++current) {
+            if (distance + distances[current] - targetDistance < 0.001) {
+                distance += distances[current];
             } else {
                 break;
             }
         }
 
-        return new Point(0, 0);
+        int next = current + 1;
+
+        double remainingPercentage = percent - distance * 100 / totalDistance;
+        double coefficient = remainingPercentage * totalDistance / distances[next];
+
+        double xDifference = (double) points[next].x - (double) points[current].x;
+        double yDifference = (double) points[next].y - (double) points[current].y;
+        int x = (int) Math.round(points[current].x + coefficient * xDifference);
+        int y = (int) Math.round(points[current].y + coefficient * yDifference);
+
+        return new Point(x, y);
+    }
+
+    public static void main(String[] s) {
+        PathTracer pt = new PathTracer(new Point[]{
+                new Point(0, 0), new Point(5, 0), new Point(10, 0)
+        });
+
+        System.out.println(pt.getCoordinateAlongThePath(0.6).toString());
     }
 }
