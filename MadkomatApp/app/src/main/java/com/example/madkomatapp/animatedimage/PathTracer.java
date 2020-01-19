@@ -1,4 +1,4 @@
-package com.example.madkomatapp.image;
+package com.example.madkomatapp.animatedimage;
 
 import android.graphics.PointF;
 
@@ -6,12 +6,12 @@ import java.util.Arrays;
 
 class PathTracer {
     private final PointF[] points;
-    private double[] distances;
-    private double totalDistance;
+    private float[] distances;
+    private float totalDistance;
 
     PathTracer(PointF[] pts) {
         this.points = closePath(pts);
-        this.distances = new double[points.length - 1];
+        this.distances = new float[points.length - 1];
         this.totalDistance = 0;
 
         initDistances();
@@ -32,20 +32,20 @@ class PathTracer {
             PointF current = points[i];
             PointF next = points[i + 1];
 
-            distances[i] = Math.sqrt(
-                    Math.pow(next.x - current.x, 2.0)
-                            + Math.pow(next.y - current.y, 2.0)
+            distances[i] = (float) Math.sqrt(
+                    Math.pow((double) next.x - (double) current.x, 2.0)
+                            + Math.pow((double) next.y - (double) current.y, 2.0)
             );
 
             totalDistance += distances[i];
         }
     }
 
-    PointF getCoordinateAlongThePath(double percent) {
+    PointF getCoordinateAlongThePath(float percent) {
         validate(percent);
 
-        double targetDistance = totalDistance * percent / 100.0f;
-        double distance = 0.0;
+        float targetDistance = totalDistance * percent / 100.0f;
+        float distance = 0.0f;
         int current;
 
         for (current = 0; current < distances.length - 1; ++current) {
@@ -58,18 +58,18 @@ class PathTracer {
 
         int next = current + 1;
 
-        double remainingPercentage = percent - distance * 100 / totalDistance;
-        double coefficient = remainingPercentage / 100 * totalDistance / distances[current];
+        float remainingPercentage = percent - distance * 100 / totalDistance;
+        float coefficient = remainingPercentage / 100 * totalDistance / distances[current];
 
-        double xDifference = (double) points[next].x - (double) points[current].x;
-        double yDifference = (double) points[next].y - (double) points[current].y;
-        double x = points[current].x + coefficient * xDifference;
-        double y = points[current].y + coefficient * yDifference;
+        float xDifference = points[next].x - points[current].x;
+        float yDifference = points[next].y - points[current].y;
+        float x = points[current].x + coefficient * xDifference;
+        float y = points[current].y + coefficient * yDifference;
 
-        return new PointF((float)x, (float)y);
+        return new PointF(x, y);
     }
 
-    private void validate(double percent) {
+    private void validate(float percent) {
         if (percent < 0.0 && percent > 100.0) {
             throw new IllegalArgumentException("percent should be in (0, 100) range, was " + percent);
         }

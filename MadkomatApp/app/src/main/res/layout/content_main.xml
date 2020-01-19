@@ -27,7 +27,7 @@
             android:textSize="15sp" />
 
         <!-- To display picture taken -->
-        <com.example.madkomatapp.image.ImagePreview
+        <com.example.madkomatapp.animatedimage.ImagePreview
             android:id="@+id/imgPreview"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

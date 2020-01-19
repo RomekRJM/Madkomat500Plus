@@ -27,7 +27,7 @@ import com.example.madkomatapp.aws.S3Service;
 import com.example.madkomatapp.camera.CameraUtils;
 import com.example.madkomatapp.face.Face;
 import com.example.madkomatapp.face.RecognitionParser;
-import com.example.madkomatapp.image.ImagePreview;
+import com.example.madkomatapp.animatedimage.ImagePreview;
 import com.example.madkomatapp.lego.BTClient;
 import com.example.madkomatapp.lego.NXJCache;
 import com.karumi.dexter.Dexter;
