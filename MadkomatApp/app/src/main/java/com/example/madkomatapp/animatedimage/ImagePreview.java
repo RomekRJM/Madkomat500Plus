@@ -18,13 +18,18 @@ public class ImagePreview extends AppCompatImageView {
     private final String PROPERTY_RECTANGLE_POSITION = "rectangle_position";
     private final String PROPERTY_RECTANGLE_HEIGHT_SCALE = "rectangle_height_scale";
     private final String PROPERTY_RECTANGLE_WIDTH_SCALE = "rectangle_width_scale";
+    private final String PROPERTY_FRAME_COLOR = "frame_color";
 
     private final Paint circlePaint = new Paint();
     private final Paint rectanglePaint = new Paint();
+    private final Paint framePaint = new Paint();
 
     private final int sizeRect;
     private int circleRadius;
+    private int frameColor;
     private final int numberOfCircles;
+    private final int gold = 0xffffd700;
+    private final int paleGold = 0xffeee8aa;
     private final double spread;
 
     private int circleLeftTopX;
@@ -45,6 +50,8 @@ public class ImagePreview extends AppCompatImageView {
 
         circlePaint.setColor(0xffaa44ff);
         rectanglePaint.setColor(0x576888ff);
+        framePaint.setColor(gold);
+        framePaint.setStrokeWidth(8.0f);
 
         sizeRect = 20;
         circleRadius = 40;
@@ -104,6 +111,14 @@ public class ImagePreview extends AppCompatImageView {
         canvas.drawRect(0, 0, getWidth(), top, rectanglePaint);
         canvas.drawRect(right, 0, getWidth(), getHeight(), rectanglePaint);
         canvas.drawRect(0, bottom, getWidth(), getHeight(), rectanglePaint);
+
+        framePaint.setColor(frameColor);
+        canvas.drawLines(new float[]{
+                left, top, right, top,
+                right, top, right, bottom,
+                right, bottom, left, bottom,
+                left, bottom, left, top
+        }, framePaint);
     }
 
     public void setBackgroundImage(Bitmap bitmap) {
@@ -133,16 +148,18 @@ public class ImagePreview extends AppCompatImageView {
         rectangleAnimator.start();
 
         PropertyValuesHolder propertyAngle = PropertyValuesHolder.ofInt(PROPERTY_ANGLE, 0, 2160);
+        PropertyValuesHolder propertyFrameColor = PropertyValuesHolder.ofInt(PROPERTY_FRAME_COLOR, gold, paleGold);
 
         ValueAnimator circleAnimator = new ValueAnimator();
         circleAnimator.setInterpolator(new LinearInterpolator());
-        circleAnimator.setValues(propertyAngle);
+        circleAnimator.setValues(propertyAngle, propertyFrameColor);
         circleAnimator.setDuration(15000);
         circleAnimator.setRepeatCount(ValueAnimator.INFINITE);
         circleAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
                 angle = (int) animation.getAnimatedValue(PROPERTY_ANGLE);
+                frameColor = (int) animation.getAnimatedValue(PROPERTY_FRAME_COLOR);
                 invalidate();
             }
         });
