@@ -16,6 +16,8 @@ import androidx.appcompat.widget.AppCompatImageView;
 import com.example.madkomatapp.face.Face;
 import com.example.madkomatapp.face.FaceBuilder;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 
 
@@ -80,7 +82,7 @@ public class ImagePreview extends AppCompatImageView {
     protected void onDraw(Canvas canvas) {
         drawBitmap(canvas);
 
-        switch(animation) {
+        switch (animation) {
             case WAITING:
                 drawMovingRectangle(canvas);
                 drawText(canvas);
@@ -130,7 +132,7 @@ public class ImagePreview extends AppCompatImageView {
     }
 
     private void drawText(Canvas canvas) {
-        canvas.drawText(TEXT.toCharArray(),0, TEXT.length(), (float)getWidth()/2,
+        canvas.drawText(TEXT.toCharArray(), 0, TEXT.length(), (float) getWidth() / 2,
                 48.0f, framePaint);
     }
 
@@ -138,13 +140,29 @@ public class ImagePreview extends AppCompatImageView {
         this.bitmap = bitmap;
     }
 
-    public void startFaceFoundAnimation(Face face) {
+    public void startFaceFoundAnimation(final List<Face> faces) {
         rectangleAnimator.end();
+        int cntr = 1;
 
-        int targetLeft = (int)Math.round(getWidth() * face.getLeft());
-        int targetRight = targetLeft + (int)Math.round(getWidth() * face.getWidth());
-        int targetTop = (int)Math.round(getHeight() * face.getTop());
-        int targetBottom = targetTop + (int)Math.round(getHeight() * face.getHeight());
+        for (final Face face : faces) {
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    startConsecutiveFaceFoundAnimation(face);
+                }
+            }, (cntr++) * 2600);
+        }
+    }
+
+    public void startConsecutiveFaceFoundAnimation(Face face) {
+        if (rectangleLockingAnimator != null) {
+            rectangleLockingAnimator.end();
+        }
+
+        int targetLeft = (int) Math.round(getWidth() * face.getLeft());
+        int targetRight = targetLeft + (int) Math.round(getWidth() * face.getWidth());
+        int targetTop = (int) Math.round(getHeight() * face.getTop());
+        int targetBottom = targetTop + (int) Math.round(getHeight() * face.getHeight());
 
         PropertyValuesHolder propertyRectangleLeft = PropertyValuesHolder.ofInt(PROPERTY_RECTANGLE_LEFT, left, targetLeft);
         PropertyValuesHolder propertyRectangleRight = PropertyValuesHolder.ofInt(PROPERTY_RECTANGLE_RIGHT, right, targetRight);
@@ -214,13 +232,26 @@ public class ImagePreview extends AppCompatImageView {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                startFaceFoundAnimation(new FaceBuilder()
-                        .setTop(0.3001307249069214)
-                        .setLeft(0.36556869745254517)
-                        .setHeight(0.17334245145320892)
-                        .setWidth(0.22835981845855713)
-                        .createFace()
-                );
+                startFaceFoundAnimation(Arrays.asList(
+                        new FaceBuilder()
+                                .setTop(0.3001307249069214)
+                                .setLeft(0.36556869745254517)
+                                .setHeight(0.17334245145320892)
+                                .setWidth(0.22835981845855713)
+                                .createFace(),
+                        new FaceBuilder()
+                                .setTop(0.1001307249069214)
+                                .setLeft(0.16556869745254517)
+                                .setHeight(0.27334245145320892)
+                                .setWidth(0.12835981845855713)
+                                .createFace(),
+                        new FaceBuilder()
+                                .setTop(0.7001307249069214)
+                                .setLeft(0.76556869745254517)
+                                .setHeight(0.27334245145320892)
+                                .setWidth(0.14835981845855713)
+                                .createFace()
+                ));
             }
         }, new Random().nextInt(3000) + 5000);
     }
