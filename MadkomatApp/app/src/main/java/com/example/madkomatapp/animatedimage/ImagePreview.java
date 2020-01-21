@@ -31,7 +31,7 @@ public class ImagePreview extends AppCompatImageView {
     private static final String PROPERTY_RECTANGLE_TOP = "rectangle_top";
     private static final String PROPERTY_RECTANGLE_BOTTOM = "rectangle_bottom";
     private static final String PROPERTY_FRAME_COLOR = "frame_color";
-
+    private static final long LOCKING_ANIMATION_LENGTH = 2500;
     private static final String TEXT = "Wyszukiwanie bąbelka...";
 
     private final Paint circlePaint = new Paint();
@@ -141,8 +141,7 @@ public class ImagePreview extends AppCompatImageView {
     }
 
     public void startFaceFoundAnimation(final List<Face> faces) {
-        rectangleAnimator.end();
-        int cntr = 1;
+        int cntr = 0;
 
         for (final Face face : faces) {
             new Handler().postDelayed(new Runnable() {
@@ -150,13 +149,17 @@ public class ImagePreview extends AppCompatImageView {
                 public void run() {
                     startConsecutiveFaceFoundAnimation(face);
                 }
-            }, (cntr++) * 2600);
+            }, (cntr++) * LOCKING_ANIMATION_LENGTH);
         }
     }
 
     public void startConsecutiveFaceFoundAnimation(Face face) {
         if (rectangleLockingAnimator != null) {
             rectangleLockingAnimator.end();
+        }
+
+        if (rectangleAnimator != null) {
+            rectangleAnimator.end();
         }
 
         int targetLeft = (int) Math.round(getWidth() * face.getLeft());
@@ -172,7 +175,7 @@ public class ImagePreview extends AppCompatImageView {
         rectangleLockingAnimator = new ValueAnimator();
         rectangleLockingAnimator.setValues(propertyRectangleLeft, propertyRectangleRight,
                 propertyRectangleTop, propertyRectangleBottom);
-        rectangleLockingAnimator.setDuration(2500);
+        rectangleLockingAnimator.setDuration(LOCKING_ANIMATION_LENGTH);
         rectangleLockingAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
