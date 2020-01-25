@@ -1,5 +1,6 @@
 package com.example.madkomatapp.animatedimage;
 
+import android.animation.Animator;
 import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
 import android.content.Context;
@@ -37,8 +38,12 @@ public class ImagePreview extends AppCompatImageView {
     private final Paint circlePaint = new Paint();
     private final Paint rectanglePaint = new Paint();
     private final Paint framePaint = new Paint();
+    private final Paint redFacePaint = new Paint();
+    private final Paint greenFacePaint = new Paint();
 
     private int frameColor;
+    private final int redFaceColor = 0x88ffa700;
+    private final int greenFaceColor = 0x8811a700;
     private final int gold = 0xffffd700;
     private final int paleGold = 0xffeee8aa;
     private float rectangleHeightScale;
@@ -49,17 +54,19 @@ public class ImagePreview extends AppCompatImageView {
     private int top;
     private int right;
     private int bottom;
+    private int lastFaceFrameToDraw;
 
     private Bitmap bitmap;
     private PathTracer pathTracer;
-
     private ValueAnimator rectangleAnimator;
     private ValueAnimator rectangleLockingAnimator;
     private ValueAnimator circleAnimator;
     private Animation animation;
 
+    private List<Face> faces;
+
     private enum Animation {
-        WAITING, LOCKING, FOUND
+        WAITING, LOCKING, FINISHED
     }
 
     public ImagePreview(Context context, AttributeSet attributeSet) {
@@ -72,6 +79,9 @@ public class ImagePreview extends AppCompatImageView {
         framePaint.setTextSize(42.0f);
         framePaint.setTextAlign(Paint.Align.CENTER);
         framePaint.setFakeBoldText(true);
+
+        redFacePaint.setColor(redFaceColor);
+        greenFacePaint.setColor(greenFaceColor);
 
         pathTracer = new PathTracer(new PointF[]{
                 new PointF(0.2f, 0.2f), new PointF(0.4f, 0.8f), new PointF(0.37f, 0.2f),
@@ -90,7 +100,11 @@ public class ImagePreview extends AppCompatImageView {
             case LOCKING:
                 drawAnimatedRectangle(canvas);
                 break;
+            case FINISHED:
+                break;
         }
+
+        drawFaceFrames(canvas);
     }
 
     private void drawBitmap(Canvas canvas) {
@@ -131,6 +145,31 @@ public class ImagePreview extends AppCompatImageView {
         }, framePaint);
     }
 
+    private void drawFaceFrames(Canvas canvas) {
+        if (faces == null) {
+            return;
+        }
+
+        int faceFrameIndex = 0;
+
+        while (faceFrameIndex < lastFaceFrameToDraw) {
+            Face face = faces.get(faceFrameIndex);
+            float left = (float) face.getLeft() * getWidth();
+            float top = (float) face.getTop() * getHeight();
+
+            canvas.drawRoundRect(
+                    left, top,
+                    left + (float) face.getWidth() * getWidth(),
+                    top + (float) face.getHeight() * getHeight(),
+                    25, 25,
+                    face.isSmilingKid() ? redFacePaint : greenFacePaint);
+            canvas.drawRect(0, 0, getWidth(), top, rectanglePaint);
+            canvas.drawRect(right, 0, getWidth(), getHeight(), rectanglePaint);
+            canvas.drawRect(0, bottom, getWidth(), getHeight(), rectanglePaint);
+            ++faceFrameIndex;
+        }
+    }
+
     private void drawText(Canvas canvas) {
         canvas.drawText(TEXT.toCharArray(), 0, TEXT.length(), (float) getWidth() / 2,
                 48.0f, framePaint);
@@ -141,6 +180,9 @@ public class ImagePreview extends AppCompatImageView {
     }
 
     public void startFaceFoundAnimation(final List<Face> faces) {
+        this.faces = faces;
+        lastFaceFrameToDraw = 0;
+
         int cntr = 0;
 
         for (final Face face : faces) {
@@ -187,6 +229,24 @@ public class ImagePreview extends AppCompatImageView {
             }
         });
         rectangleLockingAnimator.start();
+        rectangleLockingAnimator.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                ++lastFaceFrameToDraw;
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+            }
+        });
 
         animation = Animation.LOCKING;
     }
@@ -241,6 +301,9 @@ public class ImagePreview extends AppCompatImageView {
                                 .setLeft(0.36556869745254517)
                                 .setHeight(0.17334245145320892)
                                 .setWidth(0.22835981845855713)
+                                .setAgeRangeLow(2)
+                                .setAgeRangeHigh(4)
+                                .setSmiling(true)
                                 .createFace(),
                         new FaceBuilder()
                                 .setTop(0.1001307249069214)
