@@ -4,9 +4,6 @@ import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -252,26 +249,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private static void drawRectOnTop(Bitmap bitmap, Face face) {
-        Canvas canvas = new Canvas(bitmap);
-        Paint paint = new Paint();
-
-        int color = Color.argb(128, 255, 0, 0);
-
-        if (face.isSmilingKid()) {
-            color = Color.argb(128, 0, 255, 0);
-        }
-
-        paint.setColor(color);
-
-        float rectX = (float) (face.getLeft() * bitmap.getWidth());
-        float rectY = (float) (face.getTop() * bitmap.getHeight());
-        float rectWidth = (float) (face.getWidth() * bitmap.getWidth());
-        float rectHeight = (float) (face.getHeight() * bitmap.getHeight());
-
-        canvas.drawRect(rectX, rectY, rectX + rectWidth, rectY + rectHeight, paint);
-    }
-
     private static String getJsonFilePath() {
         return StringUtils.replace(imageStoragePath, ".jpg", ".json");
     }
@@ -318,12 +295,9 @@ public class MainActivity extends AppCompatActivity {
             }
 
             List<Face> faces = RecognitionParser.extractFaces(response);
-
-            for (Face face : faces) {
-                drawRectOnTop(bitmap, face);
-            }
-
             imgPreview.setImageBitmap(bitmap);
+            imgPreview.startFaceFoundAnimation(faces);
+
             CameraUtils.writeBitmapToFile(imageStoragePath, bitmap);
         }
     }
