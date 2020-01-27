@@ -162,10 +162,7 @@ public class ImagePreview extends AppCompatImageView {
                     left + (float) face.getWidth() * getWidth(),
                     top + (float) face.getHeight() * getHeight(),
                     25, 25,
-                    face.isSmilingKid() ? redFacePaint : greenFacePaint);
-            canvas.drawRect(0, 0, getWidth(), top, rectanglePaint);
-            canvas.drawRect(right, 0, getWidth(), getHeight(), rectanglePaint);
-            canvas.drawRect(0, bottom, getWidth(), getHeight(), rectanglePaint);
+                    face.isSmilingKid() ? greenFacePaint : redFacePaint);
             ++faceFrameIndex;
         }
     }
@@ -304,6 +301,7 @@ public class ImagePreview extends AppCompatImageView {
                                 .setAgeRangeLow(2)
                                 .setAgeRangeHigh(4)
                                 .setSmiling(true)
+                                .setSmilingConfidence(78.92)
                                 .createFace(),
                         new FaceBuilder()
                                 .setTop(0.1001307249069214)
