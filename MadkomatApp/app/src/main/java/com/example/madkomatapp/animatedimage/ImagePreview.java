@@ -20,6 +20,7 @@ import com.example.madkomatapp.face.FaceBuilder;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 public class ImagePreview extends AppCompatImageView {
@@ -55,7 +56,7 @@ public class ImagePreview extends AppCompatImageView {
     private int top;
     private int right;
     private int bottom;
-    private int lastFaceFrameToDraw;
+    private AtomicInteger lastFaceFrameToDraw;
 
     private Bitmap bitmap;
     private PathTracer pathTracer;
@@ -83,6 +84,7 @@ public class ImagePreview extends AppCompatImageView {
 
         redFacePaint.setColor(redFaceColor);
         greenFacePaint.setColor(greenFaceColor);
+        lastFaceFrameToDraw = new AtomicInteger(0);
 
         pathTracer = new PathTracer(new PointF[]{
                 new PointF(0.2f, 0.2f), new PointF(0.4f, 0.8f), new PointF(0.37f, 0.2f),
@@ -153,7 +155,7 @@ public class ImagePreview extends AppCompatImageView {
 
         int faceFrameIndex = 0;
 
-        while (faceFrameIndex < lastFaceFrameToDraw) {
+        while (faceFrameIndex < lastFaceFrameToDraw.get()) {
             Face face = faces.get(faceFrameIndex);
             float left = (float) face.getLeft() * getWidth();
             float top = (float) face.getTop() * getHeight();
@@ -179,7 +181,7 @@ public class ImagePreview extends AppCompatImageView {
 
     public void startFaceFoundAnimation(final List<Face> faces) {
         this.faces = faces;
-        lastFaceFrameToDraw = 0;
+        lastFaceFrameToDraw.set(0);
 
         int cntr = 0;
 
@@ -203,10 +205,12 @@ public class ImagePreview extends AppCompatImageView {
     public void startConsecutiveFaceFoundAnimation(Face face) {
         if (rectangleLockingAnimator != null) {
             rectangleLockingAnimator.end();
+            rectangleLockingAnimator = null;
         }
 
         if (rectangleAnimator != null) {
             rectangleAnimator.end();
+            rectangleAnimator = null;
         }
 
         int targetLeft = (int) Math.round(getWidth() * face.getLeft());
@@ -241,7 +245,7 @@ public class ImagePreview extends AppCompatImageView {
 
             @Override
             public void onAnimationEnd(Animator animation) {
-                ++lastFaceFrameToDraw;
+                lastFaceFrameToDraw.incrementAndGet();
             }
 
             @Override
@@ -332,11 +336,14 @@ public class ImagePreview extends AppCompatImageView {
 
     private void finishAnimation() {
         frameColorAnimator.end();
+        frameColorAnimator = null;
+        rectangleLockingAnimator.end();
+        rectangleLockingAnimator = null;
+        lastFaceFrameToDraw.decrementAndGet();
         animation = Animation.FINISHED;
     }
 
     private void restart() {
-        lastFaceFrameToDraw = 0;
         faces = null;
         animation = Animation.WAITING;
     }
