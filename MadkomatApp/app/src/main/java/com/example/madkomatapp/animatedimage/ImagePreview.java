@@ -33,6 +33,7 @@ public class ImagePreview extends AppCompatImageView {
     private static final String PROPERTY_RECTANGLE_BOTTOM = "rectangle_bottom";
     private static final String PROPERTY_FRAME_COLOR = "frame_color";
     private static final long LOCKING_ANIMATION_LENGTH = 2500;
+    private static final long PAUSE_BEFORE_FINISH = 750;
     private static final String TEXT = "Wyszukiwanie bąbelka...";
 
     private final Paint circlePaint = new Paint();
@@ -60,7 +61,7 @@ public class ImagePreview extends AppCompatImageView {
     private PathTracer pathTracer;
     private ValueAnimator rectangleAnimator;
     private ValueAnimator rectangleLockingAnimator;
-    private ValueAnimator circleAnimator;
+    private ValueAnimator frameColorAnimator;
     private Animation animation;
 
     private List<Face> faces;
@@ -190,6 +191,13 @@ public class ImagePreview extends AppCompatImageView {
                 }
             }, (cntr++) * LOCKING_ANIMATION_LENGTH);
         }
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                finishAnimation();
+            }
+        }, cntr * LOCKING_ANIMATION_LENGTH + PAUSE_BEFORE_FINISH);
     }
 
     public void startConsecutiveFaceFoundAnimation(Face face) {
@@ -249,6 +257,8 @@ public class ImagePreview extends AppCompatImageView {
     }
 
     public void startAnimators() {
+        restart();
+
         PropertyValuesHolder propertyRectanglePosition = PropertyValuesHolder.ofFloat(PROPERTY_RECTANGLE_POSITION, 0f, 100f);
         PropertyValuesHolder propertyRectangleHeight = PropertyValuesHolder.ofFloat(PROPERTY_RECTANGLE_HEIGHT_SCALE, 2.3f, 3.5f);
         PropertyValuesHolder propertyRectangleWidth = PropertyValuesHolder.ofFloat(PROPERTY_RECTANGLE_WIDTH_SCALE, 3.5f, 2.3f);
@@ -273,19 +283,19 @@ public class ImagePreview extends AppCompatImageView {
         PropertyValuesHolder propertyAngle = PropertyValuesHolder.ofInt(PROPERTY_ANGLE, 0, 2160);
         PropertyValuesHolder propertyFrameColor = PropertyValuesHolder.ofInt(PROPERTY_FRAME_COLOR, gold, paleGold);
 
-        circleAnimator = new ValueAnimator();
-        circleAnimator.setInterpolator(new LinearInterpolator());
-        circleAnimator.setValues(propertyAngle, propertyFrameColor);
-        circleAnimator.setDuration(15000);
-        circleAnimator.setRepeatCount(ValueAnimator.INFINITE);
-        circleAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+        frameColorAnimator = new ValueAnimator();
+        frameColorAnimator.setInterpolator(new LinearInterpolator());
+        frameColorAnimator.setValues(propertyAngle, propertyFrameColor);
+        frameColorAnimator.setDuration(15000);
+        frameColorAnimator.setRepeatCount(ValueAnimator.INFINITE);
+        frameColorAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
                 frameColor = (int) animation.getAnimatedValue(PROPERTY_FRAME_COLOR);
                 invalidate();
             }
         });
-        circleAnimator.start();
+        frameColorAnimator.start();
 
         animation = Animation.WAITING;
 
@@ -318,5 +328,16 @@ public class ImagePreview extends AppCompatImageView {
                 ));
             }
         }, new Random().nextInt(3000) + 5000);
+    }
+
+    private void finishAnimation() {
+        frameColorAnimator.end();
+        animation = Animation.FINISHED;
+    }
+
+    private void restart() {
+        lastFaceFrameToDraw = 0;
+        faces = null;
+        animation = Animation.WAITING;
     }
 }
