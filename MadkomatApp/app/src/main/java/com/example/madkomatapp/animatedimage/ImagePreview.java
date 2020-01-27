@@ -8,6 +8,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PointF;
+import android.graphics.Rect;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.view.animation.LinearInterpolator;
@@ -15,11 +16,8 @@ import android.view.animation.LinearInterpolator;
 import androidx.appcompat.widget.AppCompatImageView;
 
 import com.example.madkomatapp.face.Face;
-import com.example.madkomatapp.face.FaceBuilder;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
@@ -112,7 +110,7 @@ public class ImagePreview extends AppCompatImageView {
 
     private void drawBitmap(Canvas canvas) {
         if (bitmap != null) {
-            canvas.drawBitmap(bitmap, 0f, 0f, null);
+            canvas.drawBitmap(bitmap, null, new Rect(0, 0, getWidth(), getHeight()), null);
         }
     }
 
@@ -302,44 +300,18 @@ public class ImagePreview extends AppCompatImageView {
         frameColorAnimator.start();
 
         animation = Animation.WAITING;
-
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                startFaceFoundAnimation(Arrays.asList(
-                        new FaceBuilder()
-                                .setTop(0.3001307249069214)
-                                .setLeft(0.36556869745254517)
-                                .setHeight(0.17334245145320892)
-                                .setWidth(0.22835981845855713)
-                                .setAgeRangeLow(2)
-                                .setAgeRangeHigh(4)
-                                .setSmiling(true)
-                                .setSmilingConfidence(78.92)
-                                .createFace(),
-                        new FaceBuilder()
-                                .setTop(0.1001307249069214)
-                                .setLeft(0.16556869745254517)
-                                .setHeight(0.27334245145320892)
-                                .setWidth(0.12835981845855713)
-                                .createFace(),
-                        new FaceBuilder()
-                                .setTop(0.7001307249069214)
-                                .setLeft(0.76556869745254517)
-                                .setHeight(0.27334245145320892)
-                                .setWidth(0.14835981845855713)
-                                .createFace()
-                ));
-            }
-        }, new Random().nextInt(3000) + 5000);
     }
 
     private void finishAnimation() {
         frameColorAnimator.end();
         frameColorAnimator = null;
-        rectangleLockingAnimator.end();
-        rectangleLockingAnimator = null;
+
+        if(rectangleLockingAnimator != null) {
+            rectangleLockingAnimator.end();
+            rectangleLockingAnimator = null;
+        }
         lastFaceFrameToDraw.decrementAndGet();
+
         animation = Animation.FINISHED;
     }
 
