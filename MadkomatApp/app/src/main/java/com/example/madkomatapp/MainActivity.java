@@ -1,7 +1,6 @@
 package com.example.madkomatapp;
 
 import android.Manifest;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -20,6 +19,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferState;
 import com.amazonaws.util.IOUtils;
+import com.example.madkomatapp.animatedimage.AnimationListener;
 import com.example.madkomatapp.aws.S3Service;
 import com.example.madkomatapp.camera.CameraUtils;
 import com.example.madkomatapp.face.Face;
@@ -40,18 +40,13 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements AnimationListener {
 
     // Activity request codes
     private static final int CAMERA_CAPTURE_IMAGE_REQUEST_CODE = 100;
 
     // key to store image path in savedInstance state
     private static final String KEY_IMAGE_STORAGE_PATH = "image_path";
-
-    private static final int MEDIA_TYPE_IMAGE = 1;
-
-    // Bitmap sampling size
-    private static final int BITMAP_SAMPLE_SIZE = 8;
 
     // Gallery directory name to store the images
     public static final String GALLERY_DIRECTORY_NAME = "madkomat";
@@ -62,7 +57,11 @@ public class MainActivity extends AppCompatActivity {
     private static String imageStoragePath;
 
     private TextView txtDescription;
+    private Button btnCapturePicture;
+    private Button btnLeJOSConnection;
+
     private static ImagePreview imgPreview;
+    private static List<Face> faces;
 
     private final static String TAG = MainActivity.class.getSimpleName();
 
@@ -83,28 +82,20 @@ public class MainActivity extends AppCompatActivity {
 
         txtDescription = findViewById(R.id.txt_desc);
         imgPreview = findViewById(R.id.imgPreview);
-        Button btnCapturePicture = findViewById(R.id.btnCapturePicture);
-        Button btnTestBTConnection = findViewById(R.id.btnTestBTConnection);
+        imgPreview.setAnimationListener(this);
 
-        btnCapturePicture.setOnClickListener(new View.OnClickListener() {
+        btnCapturePicture = findViewById(R.id.btnCapturePicture);
+        btnLeJOSConnection = findViewById(R.id.btnTestBTConnection);
 
-            @Override
-            public void onClick(View v) {
-                if (CameraUtils.checkPermissions(getApplicationContext())) {
-                    captureImage();
-                } else {
-                    requestCameraPermission();
-                }
+        btnCapturePicture.setOnClickListener(v -> {
+            if (CameraUtils.checkPermissions(getApplicationContext())) {
+                captureImage();
+            } else {
+                requestCameraPermission();
             }
         });
 
-        btnTestBTConnection.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                new BTClient().start();
-            }
-        });
+        btnLeJOSConnection.setOnClickListener(v -> new BTClient().start());
 
         NXJCache.setup();
         restoreFromBundle(savedInstanceState);
@@ -180,8 +171,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        // save file url in bundle as it will be null on screen orientation
-        // changes
+        // save file url in bundle as it will be null on screen orientation changes
         outState.putString(KEY_IMAGE_STORAGE_PATH, imageStoragePath);
     }
 
@@ -261,15 +251,9 @@ public class MainActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Permissions required!")
                 .setMessage("Camera needs few permissions to work properly. Grant them in settings.")
-                .setPositiveButton("GOTO SETTINGS", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        CameraUtils.openSettings(MainActivity.this);
-                    }
-                })
-                .setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-
-                    }
+                .setPositiveButton("GOTO SETTINGS", (dialog, which)
+                        -> CameraUtils.openSettings(MainActivity.this))
+                .setNegativeButton("CANCEL", (dialog, which) -> {
                 }).show();
     }
 
@@ -284,21 +268,55 @@ public class MainActivity extends AppCompatActivity {
     public static void transferUpdated(S3Service.TransferOperation transferOperation, TransferState state) {
         if (TransferState.COMPLETED.equals(state) &&
                 S3Service.TransferOperation.TRANSFER_OPERATION_DOWNLOAD.equals(transferOperation)) {
-
-            Bitmap bitmap = CameraUtils.optimizeBitmap(imageStoragePath);
-            String response = "";
-
-            try {
-                response = IOUtils.toString(new FileInputStream(new File(getJsonFilePath())));
-            } catch (IOException e) {
-                Log.e(TAG, e.getMessage(), e);
-            }
-
-            List<Face> faces = RecognitionParser.extractFaces(response);
-            imgPreview.setImageBitmap(bitmap);
-            imgPreview.startFaceFoundAnimation(faces);
-
-            CameraUtils.writeBitmapToFile(imageStoragePath, bitmap);
+            parseResponse();
+            showAnimation();
         }
+    }
+
+    private static void parseResponse() {
+        String response = "";
+
+        try {
+            response = IOUtils.toString(new FileInputStream(new File(getJsonFilePath())));
+        } catch (IOException e) {
+            Log.e(TAG, e.getMessage(), e);
+        }
+
+        faces = RecognitionParser.extractFaces(response);
+    }
+
+    private static void showAnimation() {
+        Bitmap bitmap = CameraUtils.optimizeBitmap(imageStoragePath);
+
+        imgPreview.setImageBitmap(bitmap);
+        imgPreview.startFaceFoundAnimation(faces);
+
+        CameraUtils.writeBitmapToFile(imageStoragePath, bitmap);
+    }
+
+    public boolean smilingKidFound() {
+        return faces.stream().anyMatch(Face::isSmilingKid);
+    }
+
+    @Override
+    public void animationFinished() {
+        if (smilingKidFound()) {
+            changeActiveButton();
+            notifyLeJOS();
+        }
+    }
+
+    public void changeActiveButton() {
+        if (View.VISIBLE == btnCapturePicture.getVisibility()) {
+            btnCapturePicture.setVisibility(View.GONE);
+            btnLeJOSConnection.setVisibility(View.VISIBLE);
+        } else {
+            btnCapturePicture.setVisibility(View.VISIBLE);
+            btnLeJOSConnection.setVisibility(View.GONE);
+        }
+    }
+
+    private void notifyLeJOS() {
+        new BTClient().start();
     }
 }

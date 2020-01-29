@@ -65,6 +65,8 @@ public class ImagePreview extends AppCompatImageView {
 
     private List<Face> faces;
 
+    private AnimationListener animationListener;
+
     private enum Animation {
         WAITING, LOCKING, FINISHED
     }
@@ -173,6 +175,10 @@ public class ImagePreview extends AppCompatImageView {
                 48.0f, framePaint);
     }
 
+    public void setAnimationListener(AnimationListener animationListener) {
+        this.animationListener = animationListener;
+    }
+
     public void setBackgroundImage(Bitmap bitmap) {
         this.bitmap = bitmap;
     }
@@ -184,20 +190,12 @@ public class ImagePreview extends AppCompatImageView {
         int cntr = 0;
 
         for (final Face face : faces) {
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    startConsecutiveFaceFoundAnimation(face);
-                }
-            }, (cntr++) * LOCKING_ANIMATION_LENGTH);
+            new Handler().postDelayed(() -> startConsecutiveFaceFoundAnimation(face),
+                    (cntr++) * LOCKING_ANIMATION_LENGTH);
         }
 
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                finishAnimation();
-            }
-        }, cntr * LOCKING_ANIMATION_LENGTH + PAUSE_BEFORE_FINISH);
+        new Handler().postDelayed(this::finishAnimation,
+                cntr * LOCKING_ANIMATION_LENGTH + PAUSE_BEFORE_FINISH);
     }
 
     public void startConsecutiveFaceFoundAnimation(Face face) {
@@ -225,15 +223,12 @@ public class ImagePreview extends AppCompatImageView {
         rectangleLockingAnimator.setValues(propertyRectangleLeft, propertyRectangleRight,
                 propertyRectangleTop, propertyRectangleBottom);
         rectangleLockingAnimator.setDuration(LOCKING_ANIMATION_LENGTH);
-        rectangleLockingAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                left = (int) animation.getAnimatedValue(PROPERTY_RECTANGLE_LEFT);
-                right = (int) animation.getAnimatedValue(PROPERTY_RECTANGLE_RIGHT);
-                top = (int) animation.getAnimatedValue(PROPERTY_RECTANGLE_TOP);
-                bottom = (int) animation.getAnimatedValue(PROPERTY_RECTANGLE_BOTTOM);
-                invalidate();
-            }
+        rectangleLockingAnimator.addUpdateListener(animation -> {
+            left = (int) animation.getAnimatedValue(PROPERTY_RECTANGLE_LEFT);
+            right = (int) animation.getAnimatedValue(PROPERTY_RECTANGLE_RIGHT);
+            top = (int) animation.getAnimatedValue(PROPERTY_RECTANGLE_TOP);
+            bottom = (int) animation.getAnimatedValue(PROPERTY_RECTANGLE_BOTTOM);
+            invalidate();
         });
         rectangleLockingAnimator.start();
         rectangleLockingAnimator.addListener(new Animator.AnimatorListener() {
@@ -271,14 +266,11 @@ public class ImagePreview extends AppCompatImageView {
         rectangleAnimator.setDuration(8000);
         rectangleAnimator.setRepeatCount(ValueAnimator.INFINITE);
         rectangleAnimator.setRepeatMode(ValueAnimator.REVERSE);
-        rectangleAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                rectangleOrbitRadius = (float) animation.getAnimatedValue(PROPERTY_RECTANGLE_POSITION);
-                rectangleHeightScale = (float) animation.getAnimatedValue(PROPERTY_RECTANGLE_HEIGHT_SCALE);
-                rectangleWidthScale = (float) animation.getAnimatedValue(PROPERTY_RECTANGLE_WIDTH_SCALE);
-                invalidate();
-            }
+        rectangleAnimator.addUpdateListener(animation -> {
+            rectangleOrbitRadius = (float) animation.getAnimatedValue(PROPERTY_RECTANGLE_POSITION);
+            rectangleHeightScale = (float) animation.getAnimatedValue(PROPERTY_RECTANGLE_HEIGHT_SCALE);
+            rectangleWidthScale = (float) animation.getAnimatedValue(PROPERTY_RECTANGLE_WIDTH_SCALE);
+            invalidate();
         });
         rectangleAnimator.start();
 
@@ -290,12 +282,9 @@ public class ImagePreview extends AppCompatImageView {
         frameColorAnimator.setValues(propertyAngle, propertyFrameColor);
         frameColorAnimator.setDuration(15000);
         frameColorAnimator.setRepeatCount(ValueAnimator.INFINITE);
-        frameColorAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                frameColor = (int) animation.getAnimatedValue(PROPERTY_FRAME_COLOR);
-                invalidate();
-            }
+        frameColorAnimator.addUpdateListener(animation -> {
+            frameColor = (int) animation.getAnimatedValue(PROPERTY_FRAME_COLOR);
+            invalidate();
         });
         frameColorAnimator.start();
 
@@ -306,13 +295,18 @@ public class ImagePreview extends AppCompatImageView {
         frameColorAnimator.end();
         frameColorAnimator = null;
 
-        if(rectangleLockingAnimator != null) {
+        if (rectangleLockingAnimator != null) {
             rectangleLockingAnimator.end();
             rectangleLockingAnimator = null;
         }
         lastFaceFrameToDraw.decrementAndGet();
 
+        if (animationListener != null) {
+            animationListener.animationFinished();
+        }
+
         animation = Animation.FINISHED;
+        invalidate();
     }
 
     private void restart() {

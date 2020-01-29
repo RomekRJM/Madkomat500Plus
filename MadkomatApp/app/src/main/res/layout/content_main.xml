@@ -57,7 +57,9 @@
                 android:paddingLeft="8dp"
                 android:paddingRight="8dp"
                 android:text="@string/btn_take_picture"
-                android:textColor="@android:color/white" />
+                android:textColor="@android:color/white"
+                android:visibility="visible"
+                />
 
             <Button
                 android:id="@+id/btnTestBTConnection"
@@ -72,7 +74,7 @@
                 android:paddingRight="8dp"
                 android:text="@string/bt_test"
                 android:textColor="@android:color/white"
-                android:visibility="visible" />
+                android:visibility="gone" />
 
         </LinearLayout>
     </LinearLayout>
