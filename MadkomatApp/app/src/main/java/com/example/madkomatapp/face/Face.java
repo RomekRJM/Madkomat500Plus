@@ -11,10 +11,11 @@ public class Face {
     private final int ageRangeLow;
     private final int ageRangeHigh;
 
-    private static final int ADULT_THRESHOLD = 16;
+    private static final int ADULT_THRESHOLD = 18;
     private static final double MIN_SMILING_CONFIDENCE = 60.0;
 
-    public Face(double left, double top, double width, double height, boolean smiling, double smilingConfidence, int ageRangeLow, int ageRangeHigh) {
+    Face(double left, double top, double width, double height, boolean smiling,
+         double smilingConfidence, int ageRangeLow, int ageRangeHigh) {
         this.left = left;
         this.top = top;
         this.width = width;
@@ -41,19 +42,19 @@ public class Face {
         return height;
     }
 
-    public boolean isSmiling() {
+    private boolean isSmiling() {
         return smiling;
     }
 
-    public double getSmilingConfidence() {
+    private double getSmilingConfidence() {
         return smilingConfidence;
     }
 
-    public int getAgeRangeLow() {
+    private int getAgeRangeLow() {
         return ageRangeLow;
     }
 
-    public int getAgeRangeHigh() {
+    private int getAgeRangeHigh() {
         return ageRangeHigh;
     }
 
@@ -61,7 +62,12 @@ public class Face {
         return isSmiling() && getSmilingConfidence() >= MIN_SMILING_CONFIDENCE && isKid();
     }
 
-    public boolean isKid() {
+    private boolean isKid() {
         return getAgeRangeLow() <= ADULT_THRESHOLD && getAgeRangeHigh() <= ADULT_THRESHOLD;
+    }
+
+    public String toString() {
+        return isKid() ? "Dziecko" : "Dorosły" + " wiek: "
+                + getAgeRangeLow() + "-" + getAgeRangeHigh() + " lat.";
     }
 }

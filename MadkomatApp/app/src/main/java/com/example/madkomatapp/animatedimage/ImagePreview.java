@@ -40,10 +40,16 @@ public class ImagePreview extends AppCompatImageView {
     private final Paint framePaint = new Paint();
     private final Paint redFacePaint = new Paint();
     private final Paint greenFacePaint = new Paint();
+    private final Paint redFaceFramePaint = new Paint();
+    private final Paint greenFaceFramePaint = new Paint();
+    private final Paint redFaceTextPaint = new Paint();
+    private final Paint greenFaceTextPaint = new Paint();
 
     private int frameColor;
-    private final int redFaceColor = 0x88ffa700;
-    private final int greenFaceColor = 0x8811a700;
+    private final int redFaceColor = 0x77ff3700;
+    private final int greenFaceColor = 0x7711a700;
+    private final int redFaceFrameColor = 0xffff1700;
+    private final int greenFaceFrameColor = 0xff11a700;
     private final int gold = 0xffffd700;
     private final int paleGold = 0xffeee8aa;
     private float rectangleHeightScale;
@@ -83,7 +89,25 @@ public class ImagePreview extends AppCompatImageView {
         framePaint.setFakeBoldText(true);
 
         redFacePaint.setColor(redFaceColor);
+
         greenFacePaint.setColor(greenFaceColor);
+
+        redFaceFramePaint.setColor(redFaceFrameColor);
+        redFaceFramePaint.setStyle(Paint.Style.STROKE);
+        redFaceFramePaint.setStrokeWidth(5.0f);
+
+        redFaceTextPaint.setColor(redFaceFrameColor);
+        redFaceTextPaint.setTextSize(42.0f);
+        redFaceTextPaint.setTextAlign(Paint.Align.CENTER);
+
+        greenFaceFramePaint.setColor(greenFaceFrameColor);
+        greenFaceFramePaint.setStyle(Paint.Style.STROKE);
+        greenFaceFramePaint.setStrokeWidth(5.0f);
+
+        greenFaceTextPaint.setColor(greenFaceFrameColor);
+        greenFaceTextPaint.setTextSize(42.0f);
+        greenFaceTextPaint.setTextAlign(Paint.Align.CENTER);
+
         lastFaceFrameToDraw = new AtomicInteger(0);
 
         pathTracer = new PathTracer(new PointF[]{
@@ -166,7 +190,19 @@ public class ImagePreview extends AppCompatImageView {
                     top + (float) face.getHeight() * getHeight(),
                     25, 25,
                     face.isSmilingKid() ? greenFacePaint : redFacePaint);
+
+            canvas.drawRoundRect(
+                    left, top,
+                    left + (float) face.getWidth() * getWidth(),
+                    top + (float) face.getHeight() * getHeight(),
+                    25, 25,
+                    face.isSmilingKid() ? greenFaceFramePaint : redFaceFramePaint);
             ++faceFrameIndex;
+
+            canvas.drawText(face.toString(),
+                    left + (float) face.getWidth() * getWidth() / 2,
+                    top + (float) face.getHeight() * getHeight() + 42,
+                    face.isSmilingKid() ? greenFaceTextPaint : redFaceTextPaint);
         }
     }
 
