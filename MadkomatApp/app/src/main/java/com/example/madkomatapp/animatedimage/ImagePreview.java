@@ -74,7 +74,7 @@ public class ImagePreview extends AppCompatImageView {
     private AnimationListener animationListener;
 
     private enum Animation {
-        WAITING, LOCKING, FINISHED
+        WAITING, LOCKING, LOCKING_FINISHED
     }
 
     public ImagePreview(Context context, AttributeSet attributeSet) {
@@ -127,7 +127,7 @@ public class ImagePreview extends AppCompatImageView {
             case LOCKING:
                 drawAnimatedRectangle(canvas);
                 break;
-            case FINISHED:
+            case LOCKING_FINISHED:
                 break;
         }
 
@@ -341,7 +341,7 @@ public class ImagePreview extends AppCompatImageView {
             animationListener.animationFinished();
         }
 
-        animation = Animation.FINISHED;
+        animation = Animation.LOCKING_FINISHED;
         invalidate();
     }
 

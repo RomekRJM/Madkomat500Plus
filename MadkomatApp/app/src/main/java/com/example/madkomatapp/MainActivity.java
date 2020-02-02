@@ -4,6 +4,7 @@ import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -302,8 +303,11 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
     @Override
     public void animationFinished() {
         if (smilingKidFound()) {
+            setBackgroundImageFromResource(R.drawable.welfare);
             changeActiveButton();
             notifyLeJOS();
+        } else {
+            setBackgroundImageFromResource(R.drawable.scam);
         }
     }
 
@@ -338,5 +342,9 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
         }
 
         return true;
+    }
+
+    private void setBackgroundImageFromResource(int id) {
+        imgPreview.setBackgroundImage(BitmapFactory.decodeResource(getResources(), id));
     }
 }
