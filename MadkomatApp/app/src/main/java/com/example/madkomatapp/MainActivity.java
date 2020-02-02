@@ -1,6 +1,7 @@
 package com.example.madkomatapp;
 
 import android.Manifest;
+import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -317,6 +318,25 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
     }
 
     private void notifyLeJOS() {
-        new BTClient().start();
+        if (isBluetoothOn()) {
+            new BTClient().start();
+        }
+    }
+
+    private boolean isBluetoothOn() {
+        BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (mBluetoothAdapter == null) {
+            Toast.makeText(getApplicationContext(),
+                    "Sorry! Your device doesn't support Bluetooth",
+                    Toast.LENGTH_LONG).show();
+            return false;
+        } else if (!mBluetoothAdapter.isEnabled()) {
+            Toast.makeText(getApplicationContext(),
+                    "Please enable Bluetooth and connect to NXT first.",
+                    Toast.LENGTH_LONG).show();
+            return false;
+        }
+
+        return true;
     }
 }
