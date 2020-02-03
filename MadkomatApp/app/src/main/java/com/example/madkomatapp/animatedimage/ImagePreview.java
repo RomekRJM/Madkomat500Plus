@@ -8,6 +8,8 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PointF;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.util.AttributeSet;
@@ -31,6 +33,7 @@ public class ImagePreview extends AppCompatImageView {
     private static final String PROPERTY_RECTANGLE_TOP = "rectangle_top";
     private static final String PROPERTY_RECTANGLE_BOTTOM = "rectangle_bottom";
     private static final String PROPERTY_FRAME_COLOR = "frame_color";
+    private static final String PROPERTY_FOREGROUND_OPACITY = "foreground_opacity";
     private static final long LOCKING_ANIMATION_LENGTH = 2500;
     private static final long PAUSE_BEFORE_FINISH = 750;
     private static final String TEXT = "Wyszukiwanie bąbelka...";
@@ -44,6 +47,7 @@ public class ImagePreview extends AppCompatImageView {
     private final Paint greenFaceFramePaint = new Paint();
     private final Paint redFaceTextPaint = new Paint();
     private final Paint greenFaceTextPaint = new Paint();
+    private final Paint foregroundPaint = new Paint();
 
     private int frameColor;
     private final int redFaceColor = 0x77ff3700;
@@ -54,19 +58,22 @@ public class ImagePreview extends AppCompatImageView {
     private final int paleGold = 0xffeee8aa;
     private float rectangleHeightScale;
     private float rectangleWidthScale;
-    private float rectangleOrbitRadius;
+    private float rectanglePosition;
 
     private int left;
     private int top;
     private int right;
     private int bottom;
+    private int foregroundOpacity;
     private AtomicInteger lastFaceFrameToDraw;
 
-    private Bitmap bitmap;
+    private Bitmap background;
+    private Bitmap foreground;
     private PathTracer pathTracer;
     private ValueAnimator rectangleAnimator;
     private ValueAnimator rectangleLockingAnimator;
     private ValueAnimator frameColorAnimator;
+    private ValueAnimator foregroundAnimator;
     private Animation animation;
 
     private List<Face> faces;
@@ -74,7 +81,7 @@ public class ImagePreview extends AppCompatImageView {
     private AnimationListener animationListener;
 
     private enum Animation {
-        WAITING, LOCKING, LOCKING_FINISHED
+        WAITING, LOCKING, LOCKING_FINISHED, BLENDING_IN_RESULTS, FINISHED
     }
 
     public ImagePreview(Context context, AttributeSet attributeSet) {
@@ -108,6 +115,8 @@ public class ImagePreview extends AppCompatImageView {
         greenFaceTextPaint.setTextSize(42.0f);
         greenFaceTextPaint.setTextAlign(Paint.Align.CENTER);
 
+        foregroundPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER));
+
         lastFaceFrameToDraw = new AtomicInteger(0);
 
         pathTracer = new PathTracer(new PointF[]{
@@ -127,16 +136,25 @@ public class ImagePreview extends AppCompatImageView {
             case LOCKING:
                 drawAnimatedRectangle(canvas);
                 break;
+            case BLENDING_IN_RESULTS:
             case LOCKING_FINISHED:
+                drawFaceFrames(canvas);
+                break;
+            case FINISHED:
                 break;
         }
-
-        drawFaceFrames(canvas);
     }
 
     private void drawBitmap(Canvas canvas) {
-        if (bitmap != null) {
-            canvas.drawBitmap(bitmap, null, new Rect(0, 0, getWidth(), getHeight()), null);
+        final Rect destination = new Rect(0, 0, getWidth(), getHeight());
+
+        if (background != null) {
+            canvas.drawBitmap(background, null, destination, null);
+        }
+
+        if (foreground != null) {
+            foregroundPaint.setAlpha(foregroundOpacity);
+            canvas.drawBitmap(foreground, null, destination, foregroundPaint);
         }
     }
 
@@ -145,7 +163,7 @@ public class ImagePreview extends AppCompatImageView {
         int halfRectangleWidth = Math.round(rectSize / (rectangleWidthScale * 2));
         int halfRectangleHeight = Math.round(rectSize / (rectangleHeightScale * 2));
 
-        PointF coordinate = pathTracer.getCoordinateAlongThePath(rectangleOrbitRadius);
+        PointF coordinate = pathTracer.getCoordinateAlongThePath(rectanglePosition);
         int xShift = Math.round(getWidth() * coordinate.x);
         int yShift = Math.round(getHeight() * coordinate.y);
 
@@ -216,7 +234,11 @@ public class ImagePreview extends AppCompatImageView {
     }
 
     public void setBackgroundImage(Bitmap bitmap) {
-        this.bitmap = bitmap;
+        this.background = bitmap;
+    }
+
+    public void setForegroundImage(Bitmap bitmap) {
+        this.foreground = bitmap;
     }
 
     public void startFaceFoundAnimation(final List<Face> faces) {
@@ -230,7 +252,7 @@ public class ImagePreview extends AppCompatImageView {
                     (cntr++) * LOCKING_ANIMATION_LENGTH);
         }
 
-        new Handler().postDelayed(this::finishAnimation,
+        new Handler().postDelayed(this::finishLockingAnimation,
                 cntr * LOCKING_ANIMATION_LENGTH + PAUSE_BEFORE_FINISH);
     }
 
@@ -303,7 +325,7 @@ public class ImagePreview extends AppCompatImageView {
         rectangleAnimator.setRepeatCount(ValueAnimator.INFINITE);
         rectangleAnimator.setRepeatMode(ValueAnimator.REVERSE);
         rectangleAnimator.addUpdateListener(animation -> {
-            rectangleOrbitRadius = (float) animation.getAnimatedValue(PROPERTY_RECTANGLE_POSITION);
+            rectanglePosition = (float) animation.getAnimatedValue(PROPERTY_RECTANGLE_POSITION);
             rectangleHeightScale = (float) animation.getAnimatedValue(PROPERTY_RECTANGLE_HEIGHT_SCALE);
             rectangleWidthScale = (float) animation.getAnimatedValue(PROPERTY_RECTANGLE_WIDTH_SCALE);
             invalidate();
@@ -327,7 +349,20 @@ public class ImagePreview extends AppCompatImageView {
         animation = Animation.WAITING;
     }
 
-    private void finishAnimation() {
+    public void startForegroundAnimation() {
+        PropertyValuesHolder propertyForegroundOpacity = PropertyValuesHolder.ofInt(PROPERTY_FOREGROUND_OPACITY, 0, 255);
+
+        foregroundAnimator = new ValueAnimator();
+        foregroundAnimator.setValues(propertyForegroundOpacity);
+        foregroundAnimator.setDuration(3000);
+        foregroundAnimator.addUpdateListener(animation -> {
+            foregroundOpacity = (int) animation.getAnimatedValue(PROPERTY_FOREGROUND_OPACITY);
+            invalidate();
+        });
+        foregroundAnimator.start();
+    }
+
+    private void finishLockingAnimation() {
         frameColorAnimator.end();
         frameColorAnimator = null;
 

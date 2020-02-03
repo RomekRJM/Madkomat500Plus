@@ -303,11 +303,11 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
     @Override
     public void animationFinished() {
         if (smilingKidFound()) {
-            setBackgroundImageFromResource(R.drawable.welfare);
+            startForegroundAnimation(R.drawable.welfare);
             changeActiveButton();
             notifyLeJOS();
         } else {
-            setBackgroundImageFromResource(R.drawable.scam);
+            startForegroundAnimation(R.drawable.scam);
         }
     }
 
@@ -344,7 +344,8 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
         return true;
     }
 
-    private void setBackgroundImageFromResource(int id) {
-        imgPreview.setBackgroundImage(BitmapFactory.decodeResource(getResources(), id));
+    private void startForegroundAnimation(int id) {
+        imgPreview.setForegroundImage(BitmapFactory.decodeResource(getResources(), id));
+        imgPreview.startForegroundAnimation();
     }
 }
