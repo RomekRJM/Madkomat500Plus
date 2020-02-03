@@ -25,6 +25,7 @@ import com.example.madkomatapp.animatedimage.AnimationListener;
 import com.example.madkomatapp.aws.S3Service;
 import com.example.madkomatapp.camera.CameraUtils;
 import com.example.madkomatapp.face.Face;
+import com.example.madkomatapp.face.FaceBuilder;
 import com.example.madkomatapp.face.RecognitionParser;
 import com.example.madkomatapp.animatedimage.ImagePreview;
 import com.example.madkomatapp.lego.BTClient;
@@ -40,6 +41,8 @@ import org.apache.commons.lang3.StringUtils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements AnimationListener {
@@ -285,6 +288,19 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
         }
 
         faces = RecognitionParser.extractFaces(response);
+        if (faces.isEmpty()) {
+            faces = Collections.singletonList(
+                    new FaceBuilder()
+                            .setTop(0.3001307249069214)
+                            .setLeft(0.36556869745254517)
+                            .setHeight(0.17334245145320892)
+                            .setWidth(0.22835981845855713)
+                            .setAgeRangeLow(2)
+                            .setAgeRangeHigh(4)
+                            .setSmiling(true)
+                            .setSmilingConfidence(91.9542384768385)
+                            .createFace());
+        }
     }
 
     private static void showAnimation() {
@@ -301,13 +317,15 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
     }
 
     @Override
+    public void lockingFinished() {
+        startForegroundAnimation(smilingKidFound() ? R.drawable.welfare : R.drawable.scam);
+    }
+
+    @Override
     public void animationFinished() {
         if (smilingKidFound()) {
-            startForegroundAnimation(R.drawable.welfare);
             changeActiveButton();
             notifyLeJOS();
-        } else {
-            startForegroundAnimation(R.drawable.scam);
         }
     }
 

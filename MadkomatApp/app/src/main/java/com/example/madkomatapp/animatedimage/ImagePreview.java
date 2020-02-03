@@ -81,7 +81,7 @@ public class ImagePreview extends AppCompatImageView {
     private AnimationListener animationListener;
 
     private enum Animation {
-        WAITING, LOCKING, LOCKING_FINISHED, BLENDING_IN_RESULTS, FINISHED
+        WAITING, LOCKING, LOCKING_FINISHED, FOREGROUND_ENTRANCE, FINISHED
     }
 
     public ImagePreview(Context context, AttributeSet attributeSet) {
@@ -126,7 +126,7 @@ public class ImagePreview extends AppCompatImageView {
     }
 
     protected void onDraw(Canvas canvas) {
-        drawBitmap(canvas);
+        drawBackground(canvas);
 
         switch (animation) {
             case WAITING:
@@ -136,7 +136,10 @@ public class ImagePreview extends AppCompatImageView {
             case LOCKING:
                 drawAnimatedRectangle(canvas);
                 break;
-            case BLENDING_IN_RESULTS:
+            case FOREGROUND_ENTRANCE:
+                drawFaceFrames(canvas);
+                drawForeground(canvas);
+                break;
             case LOCKING_FINISHED:
                 drawFaceFrames(canvas);
                 break;
@@ -145,12 +148,16 @@ public class ImagePreview extends AppCompatImageView {
         }
     }
 
-    private void drawBitmap(Canvas canvas) {
+    private void drawBackground(Canvas canvas) {
         final Rect destination = new Rect(0, 0, getWidth(), getHeight());
 
         if (background != null) {
             canvas.drawBitmap(background, null, destination, null);
         }
+    }
+
+    private void drawForeground(Canvas canvas) {
+        final Rect destination = new Rect(0, 0, getWidth(), getHeight());
 
         if (foreground != null) {
             foregroundPaint.setAlpha(foregroundOpacity);
@@ -359,7 +366,27 @@ public class ImagePreview extends AppCompatImageView {
             foregroundOpacity = (int) animation.getAnimatedValue(PROPERTY_FOREGROUND_OPACITY);
             invalidate();
         });
+        foregroundAnimator.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                finish();
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+            }
+        });
         foregroundAnimator.start();
+
+        animation = Animation.FOREGROUND_ENTRANCE;
     }
 
     private void finishLockingAnimation() {
@@ -372,12 +399,18 @@ public class ImagePreview extends AppCompatImageView {
         }
         lastFaceFrameToDraw.decrementAndGet();
 
+        animation = Animation.LOCKING_FINISHED;
+        invalidate();
+
+        if (animationListener != null) {
+            animationListener.lockingFinished();
+        }
+    }
+
+    private void finish() {
         if (animationListener != null) {
             animationListener.animationFinished();
         }
-
-        animation = Animation.LOCKING_FINISHED;
-        invalidate();
     }
 
     private void restart() {
