@@ -13,6 +13,7 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.util.AttributeSet;
+import android.view.animation.AccelerateInterpolator;
 import android.view.animation.LinearInterpolator;
 
 import androidx.appcompat.widget.AppCompatImageView;
@@ -35,7 +36,7 @@ public class ImagePreview extends AppCompatImageView {
     private static final String PROPERTY_FRAME_COLOR = "frame_color";
     private static final String PROPERTY_FOREGROUND_OPACITY = "foreground_opacity";
     private static final long LOCKING_ANIMATION_LENGTH = 2500;
-    private static final long PAUSE_BEFORE_FINISH = 750;
+    private static final long PAUSE_BEFORE_FINISH = 1000;
     private static final String TEXT = "Wyszukiwanie bąbelka...";
 
     private final Paint circlePaint = new Paint();
@@ -91,7 +92,7 @@ public class ImagePreview extends AppCompatImageView {
         rectanglePaint.setColor(0x576888ff);
         framePaint.setColor(gold);
         framePaint.setStrokeWidth(8.0f);
-        framePaint.setTextSize(42.0f);
+        framePaint.setTextSize(64.0f);
         framePaint.setTextAlign(Paint.Align.CENTER);
         framePaint.setFakeBoldText(true);
 
@@ -121,7 +122,8 @@ public class ImagePreview extends AppCompatImageView {
 
         pathTracer = new PathTracer(new PointF[]{
                 new PointF(0.2f, 0.2f), new PointF(0.4f, 0.8f), new PointF(0.37f, 0.2f),
-                new PointF(0.2f, 0.5f), new PointF(0.5f, 0.16f), new PointF(0.8f, 0.8f)
+                new PointF(0.2f, 0.5f), new PointF(0.5f, 0.16f), new PointF(0.8f, 0.8f),
+                new PointF(0.7f, 0.3f), new PointF(0.2f, 0.8f), new PointF(0.25f, 0.8f)
         });
     }
 
@@ -328,7 +330,8 @@ public class ImagePreview extends AppCompatImageView {
         rectangleAnimator = new ValueAnimator();
         rectangleAnimator.setValues(propertyRectanglePosition, propertyRectangleHeight,
                 propertyRectangleWidth);
-        rectangleAnimator.setDuration(8000);
+        rectangleAnimator.setDuration(10000);
+        rectangleAnimator.setInterpolator(new LinearInterpolator());
         rectangleAnimator.setRepeatCount(ValueAnimator.INFINITE);
         rectangleAnimator.setRepeatMode(ValueAnimator.REVERSE);
         rectangleAnimator.addUpdateListener(animation -> {
@@ -357,11 +360,16 @@ public class ImagePreview extends AppCompatImageView {
     }
 
     public void startForegroundAnimation() {
+        new Handler().postDelayed(this::startForegroundEnteranceAnimation, 1000);
+    }
+
+    private void startForegroundEnteranceAnimation() {
         PropertyValuesHolder propertyForegroundOpacity = PropertyValuesHolder.ofInt(PROPERTY_FOREGROUND_OPACITY, 0, 255);
 
         foregroundAnimator = new ValueAnimator();
+        foregroundAnimator.setInterpolator(new AccelerateInterpolator());
         foregroundAnimator.setValues(propertyForegroundOpacity);
-        foregroundAnimator.setDuration(3000);
+        foregroundAnimator.setDuration(3500);
         foregroundAnimator.addUpdateListener(animation -> {
             foregroundOpacity = (int) animation.getAnimatedValue(PROPERTY_FOREGROUND_OPACITY);
             invalidate();
