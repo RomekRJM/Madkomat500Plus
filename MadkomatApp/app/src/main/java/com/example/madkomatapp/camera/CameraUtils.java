@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.Settings;
@@ -26,20 +25,6 @@ import java.util.Date;
 import java.util.Locale;
 
 public class CameraUtils {
-
-    /**
-     * Refreshes gallery on adding new image. Gallery won't be refreshed
-     * on older devices until device is rebooted
-     */
-    public static void refreshGallery(Context context, String filePath) {
-        // ScanFile so it will be appeared on Gallery
-        MediaScannerConnection.scanFile(context,
-                new String[]{filePath}, null,
-                new MediaScannerConnection.OnScanCompletedListener() {
-                    public void onScanCompleted(String path, Uri uri) {
-                    }
-                });
-    }
 
     public static boolean checkPermissions(Context context) {
         return ActivityCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
@@ -83,12 +68,10 @@ public class CameraUtils {
      */
     public static File getOutputMediaFile(Context context) {
 
-        // External sdcard location
         File mediaStorageDir = new File(
                 context.getExternalFilesDir(Environment.DIRECTORY_PICTURES),
                 MainActivity.GALLERY_DIRECTORY_NAME);
 
-        // Create the storage directory if it does not exist
         if (!mediaStorageDir.exists()) {
             if (!mediaStorageDir.mkdirs()) {
                 Log.e(MainActivity.GALLERY_DIRECTORY_NAME, "Oops! Failed create "
@@ -97,20 +80,11 @@ public class CameraUtils {
             }
         }
 
-        // Preparing media file naming convention
-        // adds timestamp
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss",
                 Locale.getDefault()).format(new Date());
 
         return new File(mediaStorageDir.getPath() + File.separator
                 + "IMG_" + timeStamp + "." + MainActivity.IMAGE_EXTENSION);
-    }
-
-    public static void writeBitmapToFile(String path, Bitmap bitmap) {
-        try (FileOutputStream fout = new FileOutputStream(new File(path))) {
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fout);
-        } catch (IOException ignored) {
-        }
     }
 
 }

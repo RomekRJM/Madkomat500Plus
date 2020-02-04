@@ -188,18 +188,21 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
     }
 
     @Override
+    protected void onStop()
+    {
+        super.onStop();
+        unregisterReceiver(receiver);
+    }
+
+    @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-
-        // save file url in bundle as it will be null on screen orientation changes
         outState.putString(KEY_IMAGE_STORAGE_PATH, imageStoragePath);
     }
 
     @Override
     protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-
-        // get the file url
         imageStoragePath = savedInstanceState.getString(KEY_IMAGE_STORAGE_PATH);
     }
 
@@ -209,8 +212,6 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
 
         if (requestCode == CAMERA_CAPTURE_IMAGE_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
-                // Refreshing the gallery
-                CameraUtils.refreshGallery(getApplicationContext(), imageStoragePath);
 
                 previewCapturedImage();
 
@@ -241,11 +242,9 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
     private void previewCapturedImage() {
         try {
             txtDescription.setVisibility(View.GONE);
-
             imgPreview.setVisibility(View.VISIBLE);
 
             Bitmap bitmap = CameraUtils.optimizeBitmap(imageStoragePath);
-
             imgPreview.setBackgroundImage(bitmap);
 
         } catch (NullPointerException e) {
@@ -309,12 +308,7 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
     }
 
     private void showAnimation() {
-        Bitmap bitmap = CameraUtils.optimizeBitmap(imageStoragePath);
-
-        imgPreview.setImageBitmap(bitmap);
         imgPreview.startFaceFoundAnimation(faces);
-
-        CameraUtils.writeBitmapToFile(imageStoragePath, bitmap);
     }
 
     public boolean smilingKidFound() {
