@@ -11,7 +11,6 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -52,16 +51,13 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
     // Activity request codes
     private static final int CAMERA_CAPTURE_IMAGE_REQUEST_CODE = 100;
 
-    // key to store image path in savedInstance state
-    private static final String KEY_IMAGE_STORAGE_PATH = "image_path";
-
     // Gallery directory name to store the images
     public static final String GALLERY_DIRECTORY_NAME = "madkomat";
 
     // Image file extension
     public static final String IMAGE_EXTENSION = "jpg";
 
-    private static String imageStoragePath;
+    private String imageStoragePath;
 
     private TextView txtDescription;
     private Button btnCapturePicture;
@@ -105,7 +101,6 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
         btnLeJOSConnection.setOnClickListener(v -> new BTClient().start());
 
         NXJCache.setup();
-        restoreFromBundle(savedInstanceState);
 
         receiver = new BroadcastReceiver() {
             @Override
@@ -121,22 +116,6 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
             }
         };
 
-    }
-
-    /**
-     * Restoring store image path from saved instance state
-     */
-    private void restoreFromBundle(Bundle savedInstanceState) {
-        if (savedInstanceState != null) {
-            if (savedInstanceState.containsKey(KEY_IMAGE_STORAGE_PATH)) {
-                imageStoragePath = savedInstanceState.getString(KEY_IMAGE_STORAGE_PATH);
-                if (!TextUtils.isEmpty(imageStoragePath)) {
-                    if (imageStoragePath.substring(imageStoragePath.lastIndexOf(".")).equals("." + IMAGE_EXTENSION)) {
-                        previewCapturedImage();
-                    }
-                }
-            }
-        }
     }
 
     /**
@@ -182,12 +161,6 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        registerReceiver(receiver, new IntentFilter(S3Service.NOTIFICATION));
-    }
-
-    @Override
     protected void onStop()
     {
         super.onStop();
@@ -195,15 +168,16 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
     }
 
     @Override
-    protected void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putString(KEY_IMAGE_STORAGE_PATH, imageStoragePath);
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        txtDescription.setVisibility(View.VISIBLE);
+        imgPreview.setVisibility(View.GONE);
     }
 
     @Override
-    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        imageStoragePath = savedInstanceState.getString(KEY_IMAGE_STORAGE_PATH);
+    protected void onResume() {
+        super.onResume();
+        registerReceiver(receiver, new IntentFilter(S3Service.NOTIFICATION));
     }
 
     @Override
@@ -252,7 +226,7 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
         }
     }
 
-    private static String getJsonFilePath() {
+    private String getJsonFilePath() {
         return StringUtils.replace(imageStoragePath, ".jpg", ".json");
     }
 
