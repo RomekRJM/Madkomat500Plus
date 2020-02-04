@@ -1,39 +1,42 @@
 package com.example.madkomatapp.aws;
 
-import android.app.Service;
-import android.content.Context;
+import android.app.IntentService;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.IBinder;
 import android.util.Log;
+
+import androidx.annotation.Nullable;
 
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferListener;
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferObserver;
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferState;
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferUtility;
-import com.example.madkomatapp.MainActivity;
 
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.io.Serializable;
 
-public class S3Service extends Service {
+public class S3Service extends IntentService {
 
     private AwsUtils awsUtils;
     private TransferUtility transferUtility;
     private String s3Bucket;
 
+    public final static String NOTIFICATION = "S3Service";
     public final static String INTENT_FILE_PATH = "filePath";
     public final static String INTENT_TRANSFER_OPERATION = "transferOperation";
-
-    private static Context context;
+    public final static String INTENT_TRANSFER_STATE = "transferState";
 
     public enum TransferOperation implements Serializable {
         TRANSFER_OPERATION_UPLOAD, TRANSFER_OPERATION_DOWNLOAD
     }
 
     private final static String TAG = S3Service.class.getSimpleName();
+
+    public S3Service() {
+        super("S3Service");
+    }
 
     @Override
     public void onCreate() {
@@ -42,11 +45,15 @@ public class S3Service extends Service {
         awsUtils = new AwsUtils();
         transferUtility = awsUtils.getTransferUtility(this);
         s3Bucket = awsUtils.getS3Bucket(this);
-        context = this;
     }
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
+    public IBinder onBind(Intent intent) {
+        return null;
+    }
+
+    @Override
+    protected void onHandleIntent(@Nullable Intent intent) {
         final TransferOperation transferOperation = (TransferOperation) intent.getSerializableExtra(INTENT_TRANSFER_OPERATION);
         final String filePath = intent.getStringExtra(INTENT_FILE_PATH);
         final String key = StringUtils.substringAfterLast(filePath, "/");
@@ -60,13 +67,6 @@ public class S3Service extends Service {
                 handleUpload(key, filePath);
                 break;
         }
-
-        return START_STICKY;
-    }
-
-    @Override
-    public IBinder onBind(Intent intent) {
-        return null;
     }
 
     private void handleUpload(String key, String filePath) {
@@ -76,46 +76,30 @@ public class S3Service extends Service {
     }
 
     private void handleDownload(String key, String filePath) {
-        new S3Downloader().execute(key, filePath, "500", "25");
-    }
+        int retries = 0;
 
-    private class S3Downloader extends AsyncTask<String, Void, String> {
+        do {
 
-        @Override
-        protected String doInBackground(String... strings) {
-            String key = strings[0];
-            String filePath = strings[1];
-            long retryInterval = Long.parseLong(strings[2]);
-            long maxRetries = Long.parseLong(strings[3]);
+            if (awsUtils.keyExists(getBaseContext(), s3Bucket, key)) {
+                break;
+            }
 
-            int retries = 0;
+            Log.d(TAG, "Waiting for S3 key to be accessible: " + key);
 
-            do {
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException ignored) {
+            }
 
-                if (awsUtils.keyExists(context, s3Bucket, key)) {
-                    break;
-                }
+        } while (++retries < 25);
 
-                Log.d(TAG, "Waiting for S3 key to be accessible: " + key);
-
-                try {
-                    Thread.sleep(retryInterval);
-                } catch (InterruptedException ignored) {
-                }
-
-            } while (++retries < maxRetries);
-
-            Log.d(TAG, "Downloading " + key);
-            TransferObserver transferObserver = transferUtility.download(s3Bucket, key, new File(filePath));
-            transferObserver.setTransferListener(new DownloadListener());
-
-            return null;
-        }
+        Log.d(TAG, "Downloading " + key);
+        TransferObserver transferObserver = transferUtility.download(s3Bucket, key, new File(filePath));
+        transferObserver.setTransferListener(new DownloadListener());
     }
 
     private class DownloadListener implements TransferListener {
 
-        // Simply updates the list when notified.
         @Override
         public void onError(int id, Exception e) {
             Log.e(TAG, "onError: " + id, e);
@@ -132,14 +116,13 @@ public class S3Service extends Service {
             Log.d(TAG, "onStateChanged: " + id + ", " + state);
 
             if (TransferState.COMPLETED.equals(state)) {
-                MainActivity.transferUpdated(TransferOperation.TRANSFER_OPERATION_DOWNLOAD, state);
+                publishResults(TransferOperation.TRANSFER_OPERATION_DOWNLOAD, state);
             }
         }
     }
 
     private class UploadListener implements TransferListener {
 
-        // Simply updates the list when notified.
         @Override
         public void onError(int id, Exception e) {
             Log.e(TAG, "onError: " + id, e);
@@ -155,5 +138,12 @@ public class S3Service extends Service {
         public void onStateChanged(int id, TransferState state) {
             Log.d(TAG, "onStateChanged: " + id + ", " + state);
         }
+    }
+
+    private void publishResults(TransferOperation outputPath, TransferState state) {
+        Intent intent = new Intent(NOTIFICATION);
+        intent.putExtra(INTENT_TRANSFER_OPERATION, TransferOperation.TRANSFER_OPERATION_DOWNLOAD);
+        intent.putExtra(INTENT_TRANSFER_STATE, state);
+        sendBroadcast(intent);
     }
 }

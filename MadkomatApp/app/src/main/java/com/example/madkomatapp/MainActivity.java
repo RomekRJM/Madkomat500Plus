@@ -2,7 +2,10 @@ package com.example.madkomatapp;
 
 import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -64,8 +67,10 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
     private Button btnCapturePicture;
     private Button btnLeJOSConnection;
 
-    private static ImagePreview imgPreview;
-    private static List<Face> faces;
+    private ImagePreview imgPreview;
+    private List<Face> faces;
+
+    private BroadcastReceiver receiver;
 
     private final static String TAG = MainActivity.class.getSimpleName();
 
@@ -75,12 +80,10 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
         super.onCreate(savedInstanceState);
         setContentView(R.layout.content_main);
 
-        // Checking availability of the camera
         if (!CameraUtils.isDeviceSupportCamera(getApplicationContext())) {
             Toast.makeText(getApplicationContext(),
                     "Sorry! Your device doesn't support camera",
                     Toast.LENGTH_LONG).show();
-            // will close the app if the device doesn't have camera
             finish();
         }
 
@@ -103,6 +106,20 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
 
         NXJCache.setup();
         restoreFromBundle(savedInstanceState);
+
+        receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Bundle bundle = intent.getExtras();
+                if (bundle != null) {
+                    S3Service.TransferOperation transferOperation =
+                            (S3Service.TransferOperation) bundle.getSerializable(S3Service.INTENT_TRANSFER_OPERATION);
+                    TransferState transferState =
+                            (TransferState) bundle.getSerializable(S3Service.INTENT_TRANSFER_STATE);
+                    transferUpdated(transferOperation, transferState);
+                }
+            }
+        };
 
     }
 
@@ -147,10 +164,6 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
                 }).check();
     }
 
-
-    /**
-     * Capturing Camera Image will launch camera app requested image capture
-     */
     private void captureImage() {
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
@@ -168,9 +181,12 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
         startActivityForResult(intent, CAMERA_CAPTURE_IMAGE_REQUEST_CODE);
     }
 
-    /**
-     * Saving stored image path to saved instance state
-     */
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registerReceiver(receiver, new IntentFilter(S3Service.NOTIFICATION));
+    }
+
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -179,9 +195,6 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
         outState.putString(KEY_IMAGE_STORAGE_PATH, imageStoragePath);
     }
 
-    /**
-     * Restoring image path from saved instance state
-     */
     @Override
     protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
@@ -190,9 +203,6 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
         imageStoragePath = savedInstanceState.getString(KEY_IMAGE_STORAGE_PATH);
     }
 
-    /**
-     * Activity result method will be called after closing the camera
-     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -247,10 +257,6 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
         return StringUtils.replace(imageStoragePath, ".jpg", ".json");
     }
 
-    /**
-     * Alert dialog to navigate to app settings
-     * to enable necessary permissions
-     */
     private void showPermissionsAlert() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Permissions required!")
@@ -269,7 +275,7 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
     }
 
 
-    public static void transferUpdated(S3Service.TransferOperation transferOperation, TransferState state) {
+    public void transferUpdated(S3Service.TransferOperation transferOperation, TransferState state) {
         if (TransferState.COMPLETED.equals(state) &&
                 S3Service.TransferOperation.TRANSFER_OPERATION_DOWNLOAD.equals(transferOperation)) {
             parseResponse();
@@ -277,7 +283,7 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
         }
     }
 
-    private static void parseResponse() {
+    private void parseResponse() {
         String response = "";
 
         try {
@@ -302,7 +308,7 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
         }
     }
 
-    private static void showAnimation() {
+    private void showAnimation() {
         Bitmap bitmap = CameraUtils.optimizeBitmap(imageStoragePath);
 
         imgPreview.setImageBitmap(bitmap);
