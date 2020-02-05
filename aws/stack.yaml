@@ -13,6 +13,11 @@ Resources:
     DeletionPolicy: Delete
     Properties:
       BucketName: !Sub "madkomat-${AWS::AccountId}"
+      LifecycleConfiguration:
+        Rules:
+          - Id: DeleteExpiredObjects
+            ExpirationInDays: 1
+            Status: Enabled
       NotificationConfiguration:
         LambdaConfigurations:
           - Event: "s3:ObjectCreated:*"
