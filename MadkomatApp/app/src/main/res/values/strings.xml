@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Madkomat 500+</string>
-    <string name="preview_description">Witamy w Madkomat500+</string>
+    <string name="preview_description"><b>Witamy w Madkomat500+</b>\nZrób zdjęcie uśmiechniętego bąbelka by otrzymać darowiznę.</string>
     <string name="btn_take_picture">Z\ne\ns\nk\na\nn\nu\nj\n\nb\ną\nb\ne\nl\nk\na</string>
     <string name="appbar_scrolling_view_behavior" translatable="false">android.support.design.widget.AppBarLayout$ScrollingViewBehavior</string>
     <string name="bt_test">O\nD\nB\nI\nE\nR\nZ\n\n5\n0\n0\n+</string>
