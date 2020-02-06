@@ -77,7 +77,9 @@ public class BTClient extends Thread {
             Log.i(TAG, "Closing bluetooth connection");
 
             try {
-                conn.getNXTComm().close();
+                if (conn != null) {
+                    conn.getNXTComm().close();
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
