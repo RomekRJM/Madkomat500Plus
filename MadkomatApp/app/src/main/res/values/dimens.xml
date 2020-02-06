@@ -2,4 +2,5 @@
 <resources>
     <dimen name="activity_margin">2dp</dimen>
     <dimen name="dimen_8">8dp</dimen>
+    <dimen name="button_dimen">128dp</dimen>
 </resources>

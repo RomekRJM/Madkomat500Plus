@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
 
     private TextView txtDescription;
     private Button btnCapturePicture;
-    private Button btnLeJOSConnection;
+    private Button btnGiveMoney;
     private Button btnExit;
 
     private ImagePreview imgPreview;
@@ -84,7 +84,7 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
         imgPreview.setAnimationListener(this);
 
         btnCapturePicture = findViewById(R.id.btnCapturePicture);
-        btnLeJOSConnection = findViewById(R.id.btnTestBTConnection);
+        btnGiveMoney = findViewById(R.id.btnGiveMoney);
         btnExit = findViewById(R.id.btnExit);
 
         btnCapturePicture.setOnClickListener(v -> {
@@ -95,7 +95,7 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
             }
         });
 
-        btnLeJOSConnection.setOnClickListener(v -> new BTClient().start());
+        btnGiveMoney.setOnClickListener(v -> new BTClient().start());
 
         btnExit.setOnClickListener(v -> finishAffinity());
 
@@ -298,10 +298,10 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
     public void changeActiveButton() {
         if (View.VISIBLE == btnCapturePicture.getVisibility()) {
             btnCapturePicture.setVisibility(View.GONE);
-            btnLeJOSConnection.setVisibility(View.VISIBLE);
+            btnGiveMoney.setVisibility(View.VISIBLE);
         } else {
             btnCapturePicture.setVisibility(View.VISIBLE);
-            btnLeJOSConnection.setVisibility(View.GONE);
+            btnGiveMoney.setVisibility(View.GONE);
         }
     }
 
