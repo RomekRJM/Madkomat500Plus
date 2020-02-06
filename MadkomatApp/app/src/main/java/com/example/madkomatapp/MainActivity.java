@@ -48,13 +48,8 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements AnimationListener {
 
-    // Activity request codes
     private static final int CAMERA_CAPTURE_IMAGE_REQUEST_CODE = 100;
-
-    // Gallery directory name to store the images
     public static final String GALLERY_DIRECTORY_NAME = "madkomat";
-
-    // Image file extension
     public static final String IMAGE_EXTENSION = "jpg";
 
     private String imageStoragePath;
@@ -62,6 +57,7 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
     private TextView txtDescription;
     private Button btnCapturePicture;
     private Button btnLeJOSConnection;
+    private Button btnExit;
 
     private ImagePreview imgPreview;
     private List<Face> faces;
@@ -89,6 +85,7 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
 
         btnCapturePicture = findViewById(R.id.btnCapturePicture);
         btnLeJOSConnection = findViewById(R.id.btnTestBTConnection);
+        btnExit = findViewById(R.id.btnExit);
 
         btnCapturePicture.setOnClickListener(v -> {
             if (CameraUtils.checkPermissions(getApplicationContext())) {
@@ -99,6 +96,8 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
         });
 
         btnLeJOSConnection.setOnClickListener(v -> new BTClient().start());
+
+        btnExit.setOnClickListener(v -> finishAffinity());
 
         NXJCache.setup();
 
@@ -155,8 +154,6 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
 
         intent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri);
         intent.putExtra("android.intent.extra.CAMERA_FACING", 1);
-
-        // start the image capture Intent
         startActivityForResult(intent, CAMERA_CAPTURE_IMAGE_REQUEST_CODE);
     }
 
@@ -191,8 +188,6 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
 
                 beginTransferInBackground(S3Service.TransferOperation.TRANSFER_OPERATION_UPLOAD,
                         imageStoragePath);
-
-
                 beginTransferInBackground(S3Service.TransferOperation.TRANSFER_OPERATION_DOWNLOAD,
                         getJsonFilePath());
 
@@ -200,12 +195,10 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
 
 
             } else if (resultCode == RESULT_CANCELED) {
-                // user cancelled Image capture
                 Toast.makeText(getApplicationContext(),
                         "User cancelled image capture", Toast.LENGTH_SHORT)
                         .show();
             } else {
-                // failed to capture image
                 Toast.makeText(getApplicationContext(),
                         "Sorry! Failed to capture image", Toast.LENGTH_SHORT)
                         .show();
