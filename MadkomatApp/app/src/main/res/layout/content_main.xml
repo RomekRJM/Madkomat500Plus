@@ -48,7 +48,8 @@
             android:layout_centerHorizontal="true"
             android:background="@drawable/picture_background"
             android:foreground="@drawable/picture_foreground"
-            android:visibility="visible" />
+            android:visibility="visible"
+            />
 
         <Button
             android:id="@+id/btnGiveMoney"

@@ -13,6 +13,8 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -56,6 +58,7 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
     private Button btnCapturePicture;
     private Button btnGiveMoney;
     private Button btnExit;
+    private Animation showOff;
 
     private ImagePreview imgPreview;
     private List<Face> faces;
@@ -80,6 +83,7 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
         txtDescription = findViewById(R.id.txt_desc);
         imgPreview = findViewById(R.id.imgPreview);
         imgPreview.setAnimationListener(this);
+        showOff = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.show_off);
 
         btnCapturePicture = findViewById(R.id.btnCapturePicture);
         btnGiveMoney = findViewById(R.id.btnGiveMoney);
@@ -92,6 +96,7 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
                 requestCameraPermission();
             }
         });
+        activateButton(btnCapturePicture);
 
         btnGiveMoney.setOnClickListener(v -> new BTClient().start());
 
@@ -286,12 +291,22 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
 
     public void changeActiveButton() {
         if (View.VISIBLE == btnCapturePicture.getVisibility()) {
-            btnCapturePicture.setVisibility(View.GONE);
-            btnGiveMoney.setVisibility(View.VISIBLE);
+            deactivateButton(btnCapturePicture);
+            activateButton(btnGiveMoney);
         } else {
-            btnCapturePicture.setVisibility(View.VISIBLE);
-            btnGiveMoney.setVisibility(View.GONE);
+            deactivateButton(btnGiveMoney);
+            activateButton(btnCapturePicture);
         }
+    }
+
+    public void activateButton(Button button) {
+        button.setVisibility(View.VISIBLE);
+        button.startAnimation(showOff);
+    }
+
+    public void deactivateButton(Button button) {
+        button.setVisibility(View.GONE);
+        button.clearAnimation();
     }
 
     private void notifyLeJOS() {
