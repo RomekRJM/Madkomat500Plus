@@ -35,7 +35,7 @@ public class S3Service extends IntentService {
     private final static String TAG = S3Service.class.getSimpleName();
 
     public S3Service() {
-        super("S3Service");
+        super(NOTIFICATION);
     }
 
     @Override

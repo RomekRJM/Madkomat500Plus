@@ -31,8 +31,9 @@ import com.example.madkomatapp.camera.CameraUtils;
 import com.example.madkomatapp.face.Face;
 import com.example.madkomatapp.face.RecognitionParser;
 import com.example.madkomatapp.animatedimage.ImagePreview;
-import com.example.madkomatapp.lego.BTClient;
+import com.example.madkomatapp.lego.NXTService;
 import com.example.madkomatapp.lego.NXJCache;
+import com.example.madkomatapp.lego.NXTService.CommunicationState;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
 import com.karumi.dexter.PermissionToken;
@@ -62,7 +63,8 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
     private ImagePreview imgPreview;
     private List<Face> faces;
 
-    private BroadcastReceiver receiver;
+    private BroadcastReceiver s3BroadcastReceiver;
+    private BroadcastReceiver nxtBroadcastReceiver;
 
     private final static String TAG = MainActivity.class.getSimpleName();
 
@@ -96,11 +98,11 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
         });
         activateButton(btnCapturePicture);
 
-        btnGiveMoney.setOnClickListener(v -> new BTClient().start());
+        btnGiveMoney.setOnClickListener(v -> notifyLeJOS());
 
         NXJCache.setup();
 
-        receiver = new BroadcastReceiver() {
+        s3BroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 Bundle bundle = intent.getExtras();
@@ -110,6 +112,22 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
                     TransferState transferState =
                             (TransferState) bundle.getSerializable(S3Service.INTENT_TRANSFER_STATE);
                     transferUpdated(transferOperation, transferState);
+                }
+            }
+        };
+
+        nxtBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Bundle bundle = intent.getExtras();
+                if (bundle != null) {
+                    CommunicationState state = (CommunicationState)
+                            bundle.getSerializable(NXTService.INTENT_COMMUNICATION_STATE);
+                    String error = bundle.getString(NXTService.INTENT_ERROR);
+
+                    if (CommunicationState.FAILURE.equals(state)) {
+                        Toast.makeText(getApplicationContext(), error, Toast.LENGTH_LONG).show();
+                    }
                 }
             }
         };
@@ -157,10 +175,10 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
     }
 
     @Override
-    protected void onStop()
-    {
+    protected void onStop() {
         super.onStop();
-        unregisterReceiver(receiver);
+        unregisterReceiver(s3BroadcastReceiver);
+        unregisterReceiver(nxtBroadcastReceiver);
     }
 
     @Override
@@ -173,7 +191,8 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
     @Override
     protected void onResume() {
         super.onResume();
-        registerReceiver(receiver, new IntentFilter(S3Service.NOTIFICATION));
+        registerReceiver(s3BroadcastReceiver, new IntentFilter(S3Service.NOTIFICATION));
+        registerReceiver(nxtBroadcastReceiver, new IntentFilter(NXTService.NOTIFICATION));
     }
 
     @Override
@@ -279,9 +298,8 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
 
     @Override
     public void animationFinished() {
-        if (smilingKidFound()) {
+        if (!smilingKidFound()) {
             changeActiveButton();
-            notifyLeJOS();
         }
     }
 
@@ -307,7 +325,7 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
 
     private void notifyLeJOS() {
         if (isBluetoothOn()) {
-            new BTClient().start();
+            startService(new Intent(this, NXTService.class));
         }
     }
 
