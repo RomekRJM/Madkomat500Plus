@@ -57,7 +57,6 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
     private TextView txtDescription;
     private Button btnCapturePicture;
     private Button btnGiveMoney;
-    private Button btnExit;
     private Animation showOff;
 
     private ImagePreview imgPreview;
@@ -87,7 +86,6 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
 
         btnCapturePicture = findViewById(R.id.btnCapturePicture);
         btnGiveMoney = findViewById(R.id.btnGiveMoney);
-        btnExit = findViewById(R.id.btnExit);
 
         btnCapturePicture.setOnClickListener(v -> {
             if (CameraUtils.checkPermissions(getApplicationContext())) {
@@ -99,8 +97,6 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
         activateButton(btnCapturePicture);
 
         btnGiveMoney.setOnClickListener(v -> new BTClient().start());
-
-        btnExit.setOnClickListener(v -> finishAffinity());
 
         NXJCache.setup();
 
