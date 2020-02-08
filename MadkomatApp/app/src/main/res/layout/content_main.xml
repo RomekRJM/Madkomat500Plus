@@ -49,6 +49,7 @@
             android:layout_centerVertical="true"
             android:background="@drawable/picture_background"
             android:foreground="@drawable/picture_foreground"
+            android:stateListAnimator="@animator/button_animations"
             android:visibility="visible" />
 
         <Button
@@ -59,7 +60,9 @@
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
             android:background="@drawable/money_background"
+            android:enabled="false"
             android:foreground="@drawable/money_foreground"
+            android:stateListAnimator="@animator/button_animations"
             android:visibility="gone" />
 
     </RelativeLayout>

@@ -360,10 +360,10 @@ public class ImagePreview extends AppCompatImageView {
     }
 
     public void startForegroundAnimation() {
-        new Handler().postDelayed(this::startForegroundEnteranceAnimation, 1000);
+        new Handler().postDelayed(this::startForegroundEntranceAnimation, 1000);
     }
 
-    private void startForegroundEnteranceAnimation() {
+    private void startForegroundEntranceAnimation() {
         PropertyValuesHolder propertyForegroundOpacity = PropertyValuesHolder.ofInt(PROPERTY_FOREGROUND_OPACITY, 0, 255);
 
         foregroundAnimator = new ValueAnimator();

@@ -58,7 +58,6 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
     private TextView txtDescription;
     private Button btnCapturePicture;
     private Button btnGiveMoney;
-    private Animation showOff;
 
     private ImagePreview imgPreview;
     private List<Face> faces;
@@ -84,7 +83,6 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
         txtDescription = findViewById(R.id.txt_desc);
         imgPreview = findViewById(R.id.imgPreview);
         imgPreview.setAnimationListener(this);
-        showOff = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.show_off);
 
         btnCapturePicture = findViewById(R.id.btnCapturePicture);
         btnGiveMoney = findViewById(R.id.btnGiveMoney);
@@ -298,7 +296,7 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
 
     @Override
     public void animationFinished() {
-        if (!smilingKidFound()) {
+        if (smilingKidFound()) {
             changeActiveButton();
         }
     }
@@ -315,12 +313,12 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
 
     public void activateButton(Button button) {
         button.setVisibility(View.VISIBLE);
-        button.startAnimation(showOff);
+        button.setEnabled(true);
     }
 
     public void deactivateButton(Button button) {
         button.setVisibility(View.GONE);
-        button.clearAnimation();
+        button.setEnabled(false);
     }
 
     private void notifyLeJOS() {
