@@ -13,8 +13,6 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -96,7 +94,10 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
         });
         activateButton(btnCapturePicture);
 
-        btnGiveMoney.setOnClickListener(v -> notifyLeJOS());
+        btnGiveMoney.setOnClickListener(v -> {
+            notifyLeJOS();
+            startMoneyAnimation();
+        });
 
         NXJCache.setup();
 
@@ -347,5 +348,10 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
     private void startForegroundAnimation(int id) {
         imgPreview.setForegroundImage(BitmapFactory.decodeResource(getResources(), id));
         imgPreview.startForegroundAnimation();
+    }
+
+    public void startMoneyAnimation() {
+        imgPreview.setForegroundImage(BitmapFactory.decodeResource(getResources(), R.drawable.b100));
+        imgPreview.startMoneyAnimation();
     }
 }

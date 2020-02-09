@@ -35,6 +35,7 @@ public class ImagePreview extends AppCompatImageView {
     private static final String PROPERTY_RECTANGLE_BOTTOM = "rectangle_bottom";
     private static final String PROPERTY_FRAME_COLOR = "frame_color";
     private static final String PROPERTY_FOREGROUND_OPACITY = "foreground_opacity";
+    private static final String PROPERTY_SINUSOID = "payment_sinusoid";
     private static final long LOCKING_ANIMATION_LENGTH = 2500;
     private static final long PAUSE_BEFORE_FINISH = 1000;
     private static final String TEXT = "Wyszukiwanie bąbelka...";
@@ -57,6 +58,8 @@ public class ImagePreview extends AppCompatImageView {
     private final int greenFaceFrameColor = 0xff11a700;
     private final int gold = 0xffffd700;
     private final int paleGold = 0xffeee8aa;
+    private final int numberOfChunks = 100;
+    private float sinusoid;
     private float rectangleHeightScale;
     private float rectangleWidthScale;
     private float rectanglePosition;
@@ -66,6 +69,12 @@ public class ImagePreview extends AppCompatImageView {
     private int right;
     private int bottom;
     private int foregroundOpacity;
+    private int sourceChunkWidth;
+    private int sourceChunkHeight;
+    private int destinationChunkWidth;
+    private int destinationChunkHeight;
+    private int destinationTop;
+    private int destinationLeft;
     private AtomicInteger lastFaceFrameToDraw;
 
     private Bitmap background;
@@ -75,6 +84,7 @@ public class ImagePreview extends AppCompatImageView {
     private ValueAnimator rectangleLockingAnimator;
     private ValueAnimator frameColorAnimator;
     private ValueAnimator foregroundAnimator;
+    private ValueAnimator moneyAnimator;
     private Animation animation;
 
     private List<Face> faces;
@@ -82,7 +92,7 @@ public class ImagePreview extends AppCompatImageView {
     private AnimationListener animationListener;
 
     private enum Animation {
-        WAITING, LOCKING, LOCKING_FINISHED, FOREGROUND_ENTRANCE, FINISHED
+        WAITING, LOCKING, LOCKING_FINISHED, ERROR_ENTRANCE, PAYMENT_IN_PROGRESS, FINISHED
     }
 
     public ImagePreview(Context context, AttributeSet attributeSet) {
@@ -128,21 +138,27 @@ public class ImagePreview extends AppCompatImageView {
     }
 
     protected void onDraw(Canvas canvas) {
-        drawBackground(canvas);
 
         switch (animation) {
             case WAITING:
+                drawBackground(canvas);
                 drawMovingRectangle(canvas);
                 drawText(canvas);
                 break;
             case LOCKING:
+                drawBackground(canvas);
                 drawAnimatedRectangle(canvas);
                 break;
-            case FOREGROUND_ENTRANCE:
+            case ERROR_ENTRANCE:
+                drawBackground(canvas);
                 drawFaceFrames(canvas);
                 drawForeground(canvas);
                 break;
+            case PAYMENT_IN_PROGRESS:
+                drawPayment(canvas);
+                break;
             case LOCKING_FINISHED:
+                drawBackground(canvas);
                 drawFaceFrames(canvas);
                 break;
             case FINISHED:
@@ -155,6 +171,25 @@ public class ImagePreview extends AppCompatImageView {
 
         if (background != null) {
             canvas.drawBitmap(background, null, destination, null);
+        }
+    }
+
+    private void drawPayment(Canvas canvas) {
+        if (foreground == null) return;
+
+        for (int i = 0; i < numberOfChunks; ++i) {
+            int offset = (int) (12 * Math.sin(sinusoid + i * Math.PI * 3 / numberOfChunks));
+            int sourceLeft = i * sourceChunkWidth;
+            int destinationLeftOffset = i * destinationChunkWidth;
+            int destinationTopOffset = destinationTop - offset;
+
+            Rect source = new Rect(sourceLeft, 0,
+                    sourceLeft + sourceChunkWidth, sourceChunkHeight);
+            Rect destination = new Rect(destinationLeftOffset + destinationLeft,
+                    destinationTopOffset,
+                    destinationLeftOffset + destinationLeft + destinationChunkWidth,
+                    destinationTopOffset + destinationChunkHeight);
+            canvas.drawBitmap(foreground, source, destination, foregroundPaint);
         }
     }
 
@@ -360,7 +395,51 @@ public class ImagePreview extends AppCompatImageView {
     }
 
     public void startForegroundAnimation() {
-        new Handler().postDelayed(this::startForegroundEntranceAnimation, 1000);
+        new Handler().postDelayed(this::startForegroundEntranceAnimation,
+                1000);
+    }
+
+    public void startMoneyAnimation() {
+        sourceChunkWidth = foreground.getWidth() / numberOfChunks;
+        sourceChunkHeight = foreground.getHeight();
+        destinationLeft = 10;
+        destinationTop = 50;
+        destinationChunkWidth = getWidth() / numberOfChunks;
+        destinationChunkHeight = getHeight() - 2 * destinationTop;
+
+        PropertyValuesHolder propertySinusoid = PropertyValuesHolder.ofFloat(PROPERTY_SINUSOID, 0, (float) (2 * Math.PI));
+
+        moneyAnimator = new ValueAnimator();
+        moneyAnimator.setInterpolator(new LinearInterpolator());
+        moneyAnimator.setValues(propertySinusoid);
+        moneyAnimator.setDuration(2000);
+        moneyAnimator.setRepeatCount(ValueAnimator.INFINITE);
+        moneyAnimator.setRepeatMode(ValueAnimator.RESTART);
+        moneyAnimator.addUpdateListener(animation -> {
+            sinusoid = (float) animation.getAnimatedValue(PROPERTY_SINUSOID);
+            invalidate();
+        });
+        moneyAnimator.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+            }
+        });
+        moneyAnimator.start();
+
+        animation = Animation.PAYMENT_IN_PROGRESS;
     }
 
     private void startForegroundEntranceAnimation() {
@@ -394,7 +473,7 @@ public class ImagePreview extends AppCompatImageView {
         });
         foregroundAnimator.start();
 
-        animation = Animation.FOREGROUND_ENTRANCE;
+        animation = Animation.ERROR_ENTRANCE;
     }
 
     private void finishLockingAnimation() {
