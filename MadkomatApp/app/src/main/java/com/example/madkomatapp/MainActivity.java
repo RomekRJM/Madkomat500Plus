@@ -24,13 +24,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferState;
 import com.amazonaws.util.IOUtils;
 import com.example.madkomatapp.animatedimage.AnimationListener;
+import com.example.madkomatapp.animatedimage.ImagePreview;
 import com.example.madkomatapp.aws.S3Service;
 import com.example.madkomatapp.camera.CameraUtils;
 import com.example.madkomatapp.face.Face;
 import com.example.madkomatapp.face.RecognitionParser;
-import com.example.madkomatapp.animatedimage.ImagePreview;
-import com.example.madkomatapp.lego.NXTService;
 import com.example.madkomatapp.lego.NXJCache;
+import com.example.madkomatapp.lego.NXTService;
 import com.example.madkomatapp.lego.NXTService.CommunicationState;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
@@ -296,10 +296,17 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
     }
 
     @Override
-    public void animationFinished() {
+    public void entranceFinished() {
         if (smilingKidFound()) {
             changeActiveButton();
+        } else {
+            animationFinished();
         }
+    }
+
+    @Override
+    public void animationFinished() {
+        restoreInitialView();
     }
 
     public void changeActiveButton() {
@@ -353,5 +360,12 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
     public void startMoneyAnimation() {
         imgPreview.setForegroundImage(BitmapFactory.decodeResource(getResources(), R.drawable.b100));
         imgPreview.startMoneyAnimation();
+    }
+
+    public void restoreInitialView() {
+        txtDescription.setVisibility(View.VISIBLE);
+        imgPreview.setVisibility(View.GONE);
+        deactivateButton(btnGiveMoney);
+        activateButton(btnCapturePicture);
     }
 }

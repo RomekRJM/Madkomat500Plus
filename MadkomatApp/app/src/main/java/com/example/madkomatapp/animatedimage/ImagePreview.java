@@ -37,7 +37,7 @@ public class ImagePreview extends AppCompatImageView {
     private static final String PROPERTY_FOREGROUND_OPACITY = "foreground_opacity";
     private static final String PROPERTY_SINUSOID = "payment_sinusoid";
     private static final long LOCKING_ANIMATION_LENGTH = 2500;
-    private static final long PAUSE_BEFORE_FINISH = 1000;
+    private static final long PAUSE_BEFORE_FINISH = 1500;
     private static final String TEXT = "Wyszukiwanie bąbelka...";
 
     private final Paint circlePaint = new Paint();
@@ -407,14 +407,13 @@ public class ImagePreview extends AppCompatImageView {
         destinationChunkWidth = getWidth() / numberOfChunks;
         destinationChunkHeight = getHeight() - 2 * destinationTop;
 
-        PropertyValuesHolder propertySinusoid = PropertyValuesHolder.ofFloat(PROPERTY_SINUSOID, 0, (float) (2 * Math.PI));
+        PropertyValuesHolder propertySinusoid = PropertyValuesHolder.ofFloat(PROPERTY_SINUSOID, 0,
+                (float) (8 * Math.PI));
 
         moneyAnimator = new ValueAnimator();
         moneyAnimator.setInterpolator(new LinearInterpolator());
         moneyAnimator.setValues(propertySinusoid);
-        moneyAnimator.setDuration(2000);
-        moneyAnimator.setRepeatCount(ValueAnimator.INFINITE);
-        moneyAnimator.setRepeatMode(ValueAnimator.RESTART);
+        moneyAnimator.setDuration(5000);
         moneyAnimator.addUpdateListener(animation -> {
             sinusoid = (float) animation.getAnimatedValue(PROPERTY_SINUSOID);
             invalidate();
@@ -426,7 +425,7 @@ public class ImagePreview extends AppCompatImageView {
 
             @Override
             public void onAnimationEnd(Animator animation) {
-
+                animationFinished();
             }
 
             @Override
@@ -460,7 +459,7 @@ public class ImagePreview extends AppCompatImageView {
 
             @Override
             public void onAnimationEnd(Animator animation) {
-                finish();
+                new Handler().postDelayed(() -> entranceFinished(), PAUSE_BEFORE_FINISH);
             }
 
             @Override
@@ -494,9 +493,15 @@ public class ImagePreview extends AppCompatImageView {
         }
     }
 
-    private void finish() {
+    private void animationFinished() {
         if (animationListener != null) {
             animationListener.animationFinished();
+        }
+    }
+
+    private void entranceFinished() {
+        if (animationListener != null) {
+            animationListener.entranceFinished();
         }
     }
 
