@@ -67,7 +67,7 @@ public class Face {
     }
 
     public String toString() {
-        return isKid() ? "Dziecko" : "Dorosły" + " wiek: "
+        return (isKid() ? "Dziecko" : "Dorosły") + " wiek: "
                 + getAgeRangeLow() + "-" + getAgeRangeHigh() + " lat.";
     }
 }
