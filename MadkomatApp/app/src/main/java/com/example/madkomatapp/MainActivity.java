@@ -59,6 +59,7 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
     private Button btnCapturePicture;
     private Button btnGiveMoney;
 
+    private LinearLayout previewPanel;
     private ImagePreview imgPreview;
     private List<Face> faces;
 
@@ -83,6 +84,7 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
         txtDescription = findViewById(R.id.txt_desc);
         imgPreview = findViewById(R.id.imgPreview);
         imgPreview.setAnimationListener(this);
+        previewPanel = findViewById(R.id.previewPanel);
 
         btnCapturePicture = findViewById(R.id.btnCapturePicture);
         btnGiveMoney = findViewById(R.id.btnGiveMoney);
@@ -230,12 +232,7 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
             txtDescription.setVisibility(View.GONE);
             imgPreview.setVisibility(View.VISIBLE);
 
-            Bitmap bitmap = CameraUtils.optimizeBitmap(imageStoragePath);
-            imgPreview.setBackgroundImage(bitmap);
-
-            ViewGroup.MarginLayoutParams layoutParams = new ViewGroup.MarginLayoutParams(bitmap.getWidth(), bitmap.getHeight());
-            layoutParams.setMargins(0,0,0,0);
-            imgPreview.setLayoutParams(new LinearLayout.LayoutParams(layoutParams));
+            setBackgroundPreserveRatio(CameraUtils.optimizeBitmap(imageStoragePath));
 
         } catch (NullPointerException e) {
             e.printStackTrace();
@@ -356,6 +353,19 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
         }
 
         return true;
+    }
+
+    private void setBackgroundPreserveRatio(Bitmap bitmap) {
+        imgPreview.setBackgroundImage(bitmap);
+
+        int maxHeight = previewPanel.getHeight();
+        float aspectRatio = bitmap.getWidth() / (float) bitmap.getHeight();
+        int newWidth = Math.round(aspectRatio * maxHeight);
+        int marginLeft = Math.max(0, (previewPanel.getWidth() - newWidth) / 2);
+
+        ViewGroup.MarginLayoutParams layoutParams = new ViewGroup.MarginLayoutParams(newWidth, maxHeight);
+        layoutParams.setMargins(marginLeft, 0, 0, 0);
+        imgPreview.setLayoutParams(new LinearLayout.LayoutParams(layoutParams));
     }
 
     private void startForegroundAnimation(int id) {
