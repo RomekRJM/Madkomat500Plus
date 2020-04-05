@@ -33,6 +33,7 @@
     </LinearLayout>
 
     <RelativeLayout
+        android:id="@+id/rightSidePanel"
         android:layout_width="0dp"
         android:layout_height="fill_parent"
         android:layout_weight="0.15"

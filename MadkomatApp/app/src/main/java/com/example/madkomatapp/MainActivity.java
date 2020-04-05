@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,6 +31,7 @@ import com.example.madkomatapp.animatedimage.ImagePreview;
 import com.example.madkomatapp.aws.S3Service;
 import com.example.madkomatapp.camera.CameraUtils;
 import com.example.madkomatapp.face.Face;
+import com.example.madkomatapp.face.FaceBuilder;
 import com.example.madkomatapp.face.RecognitionParser;
 import com.example.madkomatapp.lego.NXJCache;
 import com.example.madkomatapp.lego.NXTService;
@@ -45,6 +47,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements AnimationListener {
@@ -60,6 +63,7 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
     private Button btnGiveMoney;
 
     private LinearLayout previewPanel;
+    private RelativeLayout rightSidePanel;
     private ImagePreview imgPreview;
     private List<Face> faces;
 
@@ -84,6 +88,7 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
         txtDescription = findViewById(R.id.txt_desc);
         imgPreview = findViewById(R.id.imgPreview);
         imgPreview.setAnimationListener(this);
+        rightSidePanel = findViewById(R.id.rightSidePanel);
         previewPanel = findViewById(R.id.previewPanel);
 
         btnCapturePicture = findViewById(R.id.btnCapturePicture);
@@ -207,12 +212,18 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
 
                 previewCapturedImage();
 
-                beginTransferInBackground(S3Service.TransferOperation.TRANSFER_OPERATION_UPLOAD,
-                        imageStoragePath);
-                beginTransferInBackground(S3Service.TransferOperation.TRANSFER_OPERATION_DOWNLOAD,
-                        getJsonFilePath());
+//                beginTransferInBackground(S3Service.TransferOperation.TRANSFER_OPERATION_UPLOAD,
+//                        imageStoragePath);
+//                beginTransferInBackground(S3Service.TransferOperation.TRANSFER_OPERATION_DOWNLOAD,
+//                        getJsonFilePath());
 
                 imgPreview.startAnimators();
+
+                faces = Collections.singletonList(new FaceBuilder().setTop(40)
+                        .setLeft(40).setHeight(50).setWidth(50).setSmiling(true)
+                        .setSmilingConfidence(95).setAgeRangeLow(2).setAgeRangeHigh(4).createFace()
+                );
+                lockingFinished();
 
 
             } else if (resultCode == RESULT_CANCELED) {
@@ -260,7 +271,6 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
         startService(intent);
     }
 
-
     public void transferUpdated(S3Service.TransferOperation transferOperation, TransferState state) {
         if (TransferState.COMPLETED.equals(state) &&
                 S3Service.TransferOperation.TRANSFER_OPERATION_DOWNLOAD.equals(transferOperation)) {
@@ -300,7 +310,7 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
 
     @Override
     public void entranceFinished() {
-        if (smilingKidFound()) {
+        if (!smilingKidFound()) {
             changeActiveButton();
         } else {
             animationFinished();
@@ -358,13 +368,19 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
     private void setBackgroundPreserveRatio(Bitmap bitmap) {
         imgPreview.setBackgroundImage(bitmap);
 
-        int maxHeight = previewPanel.getHeight();
-        float aspectRatio = bitmap.getWidth() / (float) bitmap.getHeight();
-        int newWidth = Math.round(aspectRatio * maxHeight);
-        int marginLeft = Math.max(0, (previewPanel.getWidth() - newWidth) / 2);
+        //int maxHeight = previewPanel.getHeight();
+        //float aspectRatio = bitmap.getWidth() / (float) bitmap.getHeight();
+        //int newWidth = Math.min(Math.round(aspectRatio * maxHeight), previewPanel.getWidth());
+        //int marginLeft = Math.max(0, (previewPanel.getWidth() - newWidth) / 2);
+        int newWidth = previewPanel.getWidth(); // - rightSidePanel.getWidth()??
+        int newHeight = Math.round(
+                bitmap.getHeight() * newWidth / (float) bitmap.getWidth()
+        );
+        int marginTop = Math.max(0, (previewPanel.getHeight() - newHeight) / 2);
 
-        ViewGroup.MarginLayoutParams layoutParams = new ViewGroup.MarginLayoutParams(newWidth, maxHeight);
-        layoutParams.setMargins(marginLeft, 0, 0, 0);
+        System.out.println("New dimensions: " + newWidth + "x" + newHeight + ", " + marginTop);
+        ViewGroup.MarginLayoutParams layoutParams = new ViewGroup.MarginLayoutParams(newWidth, newHeight);
+        layoutParams.setMargins(0, marginTop, 0, 0);
         imgPreview.setLayoutParams(new LinearLayout.LayoutParams(layoutParams));
     }
 
