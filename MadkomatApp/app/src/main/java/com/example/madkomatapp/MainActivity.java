@@ -210,18 +210,12 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
 
                 previewCapturedImage();
 
-//                beginTransferInBackground(S3Service.TransferOperation.TRANSFER_OPERATION_UPLOAD,
-//                        imageStoragePath);
-//                beginTransferInBackground(S3Service.TransferOperation.TRANSFER_OPERATION_DOWNLOAD,
-//                        getJsonFilePath());
+                beginTransferInBackground(S3Service.TransferOperation.TRANSFER_OPERATION_UPLOAD,
+                        imageStoragePath);
+                beginTransferInBackground(S3Service.TransferOperation.TRANSFER_OPERATION_DOWNLOAD,
+                        getJsonFilePath());
 
                 imgPreview.startAnimators();
-
-                faces = Collections.singletonList(new FaceBuilder().setTop(40)
-                        .setLeft(40).setHeight(50).setWidth(50).setSmiling(true)
-                        .setSmilingConfidence(95).setAgeRangeLow(2).setAgeRangeHigh(4).createFace()
-                );
-                lockingFinished();
 
 
             } else if (resultCode == RESULT_CANCELED) {
@@ -308,7 +302,7 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
 
     @Override
     public void entranceFinished() {
-        if (!smilingKidFound()) {
+        if (smilingKidFound()) {
             changeActiveButton();
         } else {
             animationFinished();
