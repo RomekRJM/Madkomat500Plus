@@ -13,6 +13,7 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.util.AttributeSet;
+import android.view.ViewTreeObserver;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.LinearInterpolator;
 
@@ -90,6 +91,9 @@ public class ImagePreview extends AppCompatImageView {
     private List<Face> faces;
 
     private AnimationListener animationListener;
+    private Rect visibleWindow;
+    private Rect backgroundDestination;
+    private Rect foregroundDestination;
 
     private enum Animation {
         WAITING, LOCKING, LOCKING_FINISHED, ERROR_ENTRANCE, PAYMENT_IN_PROGRESS, FINISHED
@@ -135,6 +139,15 @@ public class ImagePreview extends AppCompatImageView {
                 new PointF(0.2f, 0.5f), new PointF(0.5f, 0.16f), new PointF(0.8f, 0.8f),
                 new PointF(0.7f, 0.3f), new PointF(0.2f, 0.8f), new PointF(0.25f, 0.8f)
         });
+
+
+        getViewTreeObserver().addOnGlobalLayoutListener(
+                () -> {
+                    visibleWindow = new Rect();
+                    getWindowVisibleDisplayFrame(visibleWindow);
+                    backgroundDestination = new Rect(0, 0, visibleWindow.width(), visibleWindow.height());
+                    foregroundDestination = new Rect(0, 0, getWidth(), getHeight());
+                });
     }
 
     protected void onDraw(Canvas canvas) {
@@ -167,10 +180,8 @@ public class ImagePreview extends AppCompatImageView {
     }
 
     private void drawBackground(Canvas canvas) {
-        final Rect destination = new Rect(0, 0, getWidth(), getHeight());
-
         if (background != null) {
-            canvas.drawBitmap(background, null, destination, null);
+            canvas.drawBitmap(background, null, backgroundDestination, null);
         }
     }
 
@@ -194,11 +205,9 @@ public class ImagePreview extends AppCompatImageView {
     }
 
     private void drawForeground(Canvas canvas) {
-        final Rect destination = new Rect(0, 0, getWidth(), getHeight());
-
         if (foreground != null) {
             foregroundPaint.setAlpha(foregroundOpacity);
-            canvas.drawBitmap(foreground, null, destination, foregroundPaint);
+            canvas.drawBitmap(foreground, null, foregroundDestination, foregroundPaint);
         }
     }
 

@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,6 +31,7 @@ import com.example.madkomatapp.animatedimage.ImagePreview;
 import com.example.madkomatapp.aws.S3Service;
 import com.example.madkomatapp.camera.CameraUtils;
 import com.example.madkomatapp.face.Face;
+import com.example.madkomatapp.face.FaceBuilder;
 import com.example.madkomatapp.face.RecognitionParser;
 import com.example.madkomatapp.lego.NXJCache;
 import com.example.madkomatapp.lego.NXTService;
@@ -45,6 +47,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements AnimationListener {
@@ -260,7 +263,6 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
         startService(intent);
     }
 
-
     public void transferUpdated(S3Service.TransferOperation transferOperation, TransferState state) {
         if (TransferState.COMPLETED.equals(state) &&
                 S3Service.TransferOperation.TRANSFER_OPERATION_DOWNLOAD.equals(transferOperation)) {
@@ -358,18 +360,20 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
     private void setBackgroundPreserveRatio(Bitmap bitmap) {
         imgPreview.setBackgroundImage(bitmap);
 
-        int maxHeight = previewPanel.getHeight();
-        float aspectRatio = bitmap.getWidth() / (float) bitmap.getHeight();
-        int newWidth = Math.round(aspectRatio * maxHeight);
-        int marginLeft = Math.max(0, (previewPanel.getWidth() - newWidth) / 2);
+        int newWidth = previewPanel.getWidth();
+        int newHeight = Math.round(
+                bitmap.getHeight() * newWidth / (float) bitmap.getWidth()
+        );
+        int marginTop = Math.max(0, (previewPanel.getHeight() - newHeight) / 2);
+        ViewGroup.MarginLayoutParams layoutParams = new ViewGroup.MarginLayoutParams(newWidth, newHeight);
+        layoutParams.setMargins(0, marginTop, 0, 0);
 
-        ViewGroup.MarginLayoutParams layoutParams = new ViewGroup.MarginLayoutParams(newWidth, maxHeight);
-        layoutParams.setMargins(marginLeft, 0, 0, 0);
         imgPreview.setLayoutParams(new LinearLayout.LayoutParams(layoutParams));
     }
 
     private void startForegroundAnimation(int id) {
-        imgPreview.setForegroundImage(BitmapFactory.decodeResource(getResources(), id));
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), id);
+        imgPreview.setForegroundImage(bitmap);
         imgPreview.startForegroundAnimation();
     }
 
