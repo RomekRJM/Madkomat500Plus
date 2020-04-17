@@ -177,7 +177,6 @@ public class ImagePreview extends AppCompatImageView {
 
     private void drawBackground(Canvas canvas) {
         final Rect destination = new Rect(0, 0, visibleWindow.width(), visibleWindow.height());
-
         if (background != null) {
             canvas.drawBitmap(background, null, destination, null);
         }
@@ -204,8 +203,7 @@ public class ImagePreview extends AppCompatImageView {
 
     private void drawForeground(Canvas canvas) {
         if (foreground != null) {
-            final Rect destination = new Rect(0, 0, visibleWindow.width(), visibleWindow.height());
-            System.out.println(getWidth() + "x" + getHeight());
+            final Rect destination = new Rect(0, 0, getWidth(), getHeight());
             foregroundPaint.setAlpha(foregroundOpacity);
             canvas.drawBitmap(foreground, null, destination, foregroundPaint);
         }

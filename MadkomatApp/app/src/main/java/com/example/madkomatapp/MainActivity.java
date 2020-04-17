@@ -63,7 +63,6 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
     private Button btnGiveMoney;
 
     private LinearLayout previewPanel;
-    private RelativeLayout rightSidePanel;
     private ImagePreview imgPreview;
     private List<Face> faces;
 
@@ -88,7 +87,6 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
         txtDescription = findViewById(R.id.txt_desc);
         imgPreview = findViewById(R.id.imgPreview);
         imgPreview.setAnimationListener(this);
-        rightSidePanel = findViewById(R.id.rightSidePanel);
         previewPanel = findViewById(R.id.previewPanel);
 
         btnCapturePicture = findViewById(R.id.btnCapturePicture);
@@ -368,24 +366,20 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
     private void setBackgroundPreserveRatio(Bitmap bitmap) {
         imgPreview.setBackgroundImage(bitmap);
 
-        //int maxHeight = previewPanel.getHeight();
-        //float aspectRatio = bitmap.getWidth() / (float) bitmap.getHeight();
-        //int newWidth = Math.min(Math.round(aspectRatio * maxHeight), previewPanel.getWidth());
-        //int marginLeft = Math.max(0, (previewPanel.getWidth() - newWidth) / 2);
-        int newWidth = previewPanel.getWidth(); // - rightSidePanel.getWidth()??
+        int newWidth = previewPanel.getWidth();
         int newHeight = Math.round(
                 bitmap.getHeight() * newWidth / (float) bitmap.getWidth()
         );
         int marginTop = Math.max(0, (previewPanel.getHeight() - newHeight) / 2);
-
-        System.out.println("New dimensions: " + newWidth + "x" + newHeight + ", " + marginTop);
         ViewGroup.MarginLayoutParams layoutParams = new ViewGroup.MarginLayoutParams(newWidth, newHeight);
         layoutParams.setMargins(0, marginTop, 0, 0);
+
         imgPreview.setLayoutParams(new LinearLayout.LayoutParams(layoutParams));
     }
 
     private void startForegroundAnimation(int id) {
-        imgPreview.setForegroundImage(BitmapFactory.decodeResource(getResources(), id));
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), id);
+        imgPreview.setForegroundImage(bitmap);
         imgPreview.startForegroundAnimation();
     }
 
