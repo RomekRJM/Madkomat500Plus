@@ -16,7 +16,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,7 +30,6 @@ import com.example.madkomatapp.animatedimage.ImagePreview;
 import com.example.madkomatapp.aws.S3Service;
 import com.example.madkomatapp.camera.CameraUtils;
 import com.example.madkomatapp.face.Face;
-import com.example.madkomatapp.face.FaceBuilder;
 import com.example.madkomatapp.face.RecognitionParser;
 import com.example.madkomatapp.lego.NXJCache;
 import com.example.madkomatapp.lego.NXTService;
@@ -47,7 +45,6 @@ import org.apache.commons.lang3.StringUtils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements AnimationListener {
@@ -359,26 +356,33 @@ public class MainActivity extends AppCompatActivity implements AnimationListener
 
     private void setBackgroundPreserveRatio(Bitmap bitmap) {
         imgPreview.setBackgroundImage(bitmap);
+        rescaleImagePreviewTo(bitmap, true);
+    }
 
-        int newWidth = previewPanel.getWidth();
-        int newHeight = Math.round(
-                bitmap.getHeight() * newWidth / (float) bitmap.getWidth()
-        );
+    private void rescaleImagePreviewTo(Bitmap bitmap, boolean preserveRatio) {
+        int newHeight = previewPanel.getHeight();
+        int newWidth = preserveRatio ? Math.round(
+                bitmap.getWidth() * newHeight / (float) bitmap.getHeight()
+        ) : previewPanel.getWidth();
         int marginTop = Math.max(0, (previewPanel.getHeight() - newHeight) / 2);
         ViewGroup.MarginLayoutParams layoutParams = new ViewGroup.MarginLayoutParams(newWidth, newHeight);
         layoutParams.setMargins(0, marginTop, 0, 0);
 
         imgPreview.setLayoutParams(new LinearLayout.LayoutParams(layoutParams));
+        imgPreview.invalidate();
     }
 
     private void startForegroundAnimation(int id) {
         Bitmap bitmap = BitmapFactory.decodeResource(getResources(), id);
         imgPreview.setForegroundImage(bitmap);
+        rescaleImagePreviewTo(bitmap, false);
         imgPreview.startForegroundAnimation();
     }
 
     public void startMoneyAnimation() {
-        imgPreview.setForegroundImage(BitmapFactory.decodeResource(getResources(), R.drawable.b100));
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.b100);
+        imgPreview.setForegroundImage(bitmap);
+        rescaleImagePreviewTo(bitmap, false);
         imgPreview.startMoneyAnimation();
     }
 

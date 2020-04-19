@@ -135,8 +135,8 @@ public class ImagePreview extends AppCompatImageView {
 
         pathTracer = new PathTracer(new PointF[]{
                 new PointF(0.2f, 0.2f), new PointF(0.4f, 0.8f), new PointF(0.37f, 0.2f),
-                new PointF(0.2f, 0.5f), new PointF(0.5f, 0.16f), new PointF(0.8f, 0.8f),
-                new PointF(0.7f, 0.3f), new PointF(0.2f, 0.8f), new PointF(0.25f, 0.8f)
+                new PointF(0.2f, 0.5f), new PointF(0.5f, 0.16f), new PointF(0.65f, 0.8f),
+                new PointF(0.6f, 0.3f), new PointF(0.2f, 0.8f), new PointF(0.25f, 0.8f)
         });
 
         getViewTreeObserver().addOnGlobalLayoutListener(
@@ -411,8 +411,8 @@ public class ImagePreview extends AppCompatImageView {
         sourceChunkHeight = foreground.getHeight();
         destinationLeft = 10;
         destinationTop = 50;
-        destinationChunkWidth = visibleWindow.width() / numberOfChunks;
-        destinationChunkHeight = visibleWindow.height() - 2 * destinationTop;
+        destinationChunkWidth = getWidth() / numberOfChunks;
+        destinationChunkHeight = getHeight() - 2 * destinationTop;
 
         PropertyValuesHolder propertySinusoid = PropertyValuesHolder.ofFloat(PROPERTY_SINUSOID, 0,
                 (float) (8 * Math.PI));
