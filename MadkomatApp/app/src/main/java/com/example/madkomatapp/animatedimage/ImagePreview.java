@@ -13,7 +13,6 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.util.AttributeSet;
-import android.view.ViewTreeObserver;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.LinearInterpolator;
 
@@ -140,7 +139,6 @@ public class ImagePreview extends AppCompatImageView {
                 new PointF(0.7f, 0.3f), new PointF(0.2f, 0.8f), new PointF(0.25f, 0.8f)
         });
 
-
         getViewTreeObserver().addOnGlobalLayoutListener(
                 () -> {
                     visibleWindow = new Rect();
@@ -212,13 +210,13 @@ public class ImagePreview extends AppCompatImageView {
     }
 
     private void drawMovingRectangle(Canvas canvas) {
-        int rectSize = Math.min(getWidth(), getHeight());
+        int rectSize = Math.min(visibleWindow.width(), visibleWindow.height());
         int halfRectangleWidth = Math.round(rectSize / (rectangleWidthScale * 2));
         int halfRectangleHeight = Math.round(rectSize / (rectangleHeightScale * 2));
 
         PointF coordinate = pathTracer.getCoordinateAlongThePath(rectanglePosition);
-        int xShift = Math.round(getWidth() * coordinate.x);
-        int yShift = Math.round(getHeight() * coordinate.y);
+        int xShift = Math.round(visibleWindow.width() * coordinate.x);
+        int yShift = Math.round(visibleWindow.height() * coordinate.y);
 
         left = xShift - halfRectangleWidth;
         top = yShift - halfRectangleHeight;
@@ -229,10 +227,10 @@ public class ImagePreview extends AppCompatImageView {
     }
 
     private void drawAnimatedRectangle(Canvas canvas) {
-        canvas.drawRect(0, 0, left, getHeight(), rectanglePaint);
-        canvas.drawRect(0, 0, getWidth(), top, rectanglePaint);
-        canvas.drawRect(right, 0, getWidth(), getHeight(), rectanglePaint);
-        canvas.drawRect(0, bottom, getWidth(), getHeight(), rectanglePaint);
+        canvas.drawRect(0, 0, left, visibleWindow.height(), rectanglePaint);
+        canvas.drawRect(0, 0, visibleWindow.width(), top, rectanglePaint);
+        canvas.drawRect(right, 0, visibleWindow.width(), visibleWindow.height(), rectanglePaint);
+        canvas.drawRect(0, bottom, visibleWindow.width(), visibleWindow.height(), rectanglePaint);
 
         framePaint.setColor(frameColor);
         canvas.drawLines(new float[]{
@@ -252,27 +250,27 @@ public class ImagePreview extends AppCompatImageView {
 
         while (faceFrameIndex < lastFaceFrameToDraw.get()) {
             Face face = faces.get(faceFrameIndex);
-            float left = (float) face.getLeft() * getWidth();
-            float top = (float) face.getTop() * getHeight();
+            float left = (float) face.getLeft() * visibleWindow.width();
+            float top = (float) face.getTop() * visibleWindow.height();
 
             canvas.drawRoundRect(
                     left, top,
-                    left + (float) face.getWidth() * getWidth(),
-                    top + (float) face.getHeight() * getHeight(),
+                    left + (float) face.getWidth() * visibleWindow.width(),
+                    top + (float) face.getHeight() * visibleWindow.height(),
                     25, 25,
                     face.isSmilingKid() ? greenFacePaint : redFacePaint);
 
             canvas.drawRoundRect(
                     left, top,
-                    left + (float) face.getWidth() * getWidth(),
-                    top + (float) face.getHeight() * getHeight(),
+                    left + (float) face.getWidth() * visibleWindow.width(),
+                    top + (float) face.getHeight() * visibleWindow.height(),
                     25, 25,
                     face.isSmilingKid() ? greenFaceFramePaint : redFaceFramePaint);
             ++faceFrameIndex;
 
             canvas.drawText(face.toString(),
-                    left + (float) face.getWidth() * getWidth() / 2,
-                    top + (float) face.getHeight() * getHeight() + 42,
+                    left + (float) face.getWidth() * visibleWindow.width() / 2,
+                    top + (float) face.getHeight() * visibleWindow.height() + 42,
                     face.isSmilingKid() ? greenFaceTextPaint : redFaceTextPaint);
         }
     }
@@ -320,10 +318,10 @@ public class ImagePreview extends AppCompatImageView {
             rectangleAnimator = null;
         }
 
-        int targetLeft = (int) Math.round(getWidth() * face.getLeft());
-        int targetRight = targetLeft + (int) Math.round(getWidth() * face.getWidth());
-        int targetTop = (int) Math.round(getHeight() * face.getTop());
-        int targetBottom = targetTop + (int) Math.round(getHeight() * face.getHeight());
+        int targetLeft = (int) Math.round(visibleWindow.width() * face.getLeft());
+        int targetRight = targetLeft + (int) Math.round(visibleWindow.width() * face.getWidth());
+        int targetTop = (int) Math.round(visibleWindow.height() * face.getTop());
+        int targetBottom = targetTop + (int) Math.round(visibleWindow.height() * face.getHeight());
 
         PropertyValuesHolder propertyRectangleLeft = PropertyValuesHolder.ofInt(PROPERTY_RECTANGLE_LEFT, left, targetLeft);
         PropertyValuesHolder propertyRectangleRight = PropertyValuesHolder.ofInt(PROPERTY_RECTANGLE_RIGHT, right, targetRight);
@@ -413,8 +411,8 @@ public class ImagePreview extends AppCompatImageView {
         sourceChunkHeight = foreground.getHeight();
         destinationLeft = 10;
         destinationTop = 50;
-        destinationChunkWidth = getWidth() / numberOfChunks;
-        destinationChunkHeight = getHeight() - 2 * destinationTop;
+        destinationChunkWidth = visibleWindow.width() / numberOfChunks;
+        destinationChunkHeight = visibleWindow.height() - 2 * destinationTop;
 
         PropertyValuesHolder propertySinusoid = PropertyValuesHolder.ofFloat(PROPERTY_SINUSOID, 0,
                 (float) (8 * Math.PI));
