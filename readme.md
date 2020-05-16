@@ -1,7 +1,7 @@
 # Madkomat 500+
 
 ## Video
-Work in progress..
+[![Madkomat 500+](https://img.youtube.com/vi/KzMmqTH6Eng/0.jpg)](https://www.youtube.com/watch?v=KzMmqTH6Eng)
 
 ## What is this?
 
