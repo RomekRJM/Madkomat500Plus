@@ -1,10 +1,10 @@
 <?xml version='1.0' encoding='utf-8'?>
-<mlt title="Anonymous Submission" LC_NUMERIC="pl_PL.UTF-8" producer="main bin" version="6.12.0" root="/home/romek/Wideo">
+<mlt title="Anonymous Submission" LC_NUMERIC="pl_PL.UTF-8" producer="main bin" version="6.12.0" root="/home/romek/pworkspace/Madkomat500Plus">
  <profile frame_rate_num="25" sample_aspect_num="1" display_aspect_den="1080" colorspace="601" progressive="1" description="automatic" display_aspect_num="1920" frame_rate_den="1" width="1920" height="1080" sample_aspect_den="1"/>
  <producer title="Anonymous Submission" id="1" in="0" out="1292">
   <property name="length">00:00:51:18</property>
   <property name="eof">pause</property>
-  <property name="resource">dobre_front.mp4</property>
+  <property name="resource">/home/romek/Wideo/dobre_front.mp4</property>
   <property name="audio_index">1</property>
   <property name="video_index">0</property>
   <property name="mute_on_pause">1</property>
@@ -64,7 +64,7 @@
  <producer title="Anonymous Submission" id="2" in="0" out="2080">
   <property name="length">00:01:23:06</property>
   <property name="eof">pause</property>
-  <property name="resource">dobre_xiaomi.mp4</property>
+  <property name="resource">/home/romek/Wideo/dobre_xiaomi.mp4</property>
   <property name="audio_index">1</property>
   <property name="video_index">0</property>
   <property name="mute_on_pause">1</property>
@@ -125,7 +125,7 @@
  <producer title="Stabilizowany" id="3" in="0" out="1292">
   <property name="length">00:00:51:18</property>
   <property name="eof">pause</property>
-  <property name="resource">dobre_front.mp4.mlt</property>
+  <property name="resource">/home/romek/Wideo/dobre_front.mp4.mlt</property>
   <property name="mlt_service">xml</property>
   <property name="global_feed">1</property>
   <property name="xml">was here</property>
@@ -136,7 +136,7 @@
  <producer title="Anonymous Submission" id="4" in="0" out="124">
   <property name="length">125</property>
   <property name="eof">loop</property>
-  <property name="resource">madkomat</property>
+  <property name="resource">/home/romek/Wideo/madkomat</property>
   <property name="audio_index">-1</property>
   <property name="video_index">0</property>
   <property name="mute_on_pause">1</property>
@@ -180,7 +180,7 @@
   <property name="aspect_ratio">1</property>
   <property name="seekable">1</property>
   <property name="mlt_service">kdenlivetitle</property>
-  <property name="kdenlive:clipname">Wycinek tytułowy</property>
+  <property name="kdenlive:clipname">tytuł</property>
   <property name="kdenlive:folderid">-1</property>
   <property name="xmldata">&lt;kdenlivetitle duration="125" LC_NUMERIC="pl_PL.UTF-8" width="1920" height="1080" out="125">
  &lt;item type="QGraphicsTextItem" z-index="0">
@@ -201,7 +201,7 @@
   <property name="kdenlive:file_hash">3abf0ed4299a1407d6d522b3c07403a1</property>
   <property name="global_feed">1</property>
  </producer>
- <producer id="6" in="0" out="124">
+ <producer id="7" in="0" out="124">
   <property name="length">125</property>
   <property name="eof">pause</property>
   <property name="resource"/>
@@ -209,7 +209,7 @@
   <property name="aspect_ratio">1</property>
   <property name="seekable">1</property>
   <property name="mlt_service">kdenlivetitle</property>
-  <property name="kdenlive:clipname">Wycinek tytułowy</property>
+  <property name="kdenlive:clipname">opis</property>
   <property name="kdenlive:folderid">-1</property>
   <property name="xmldata">&lt;kdenlivetitle duration="125" LC_NUMERIC="pl_PL.UTF-8" width="1920" height="1080" out="125">
  &lt;item type="QGraphicsTextItem" z-index="0">
@@ -226,9 +226,98 @@ urzeczywistnić pewnego mema...&lt;/content>
 </property>
   <property name="kdenlive:duration">125</property>
   <property name="force_reload">0</property>
+  <property name="kdenlive:file_hash">76748898406ba841d080dabf5a2d270f</property>
+  <property name="global_feed">1</property>
   <property name="meta.media.width">1920</property>
   <property name="meta.media.height">1080</property>
-  <property name="kdenlive:file_hash">76748898406ba841d080dabf5a2d270f</property>
+ </producer>
+ <producer title="Anonymous Submission" id="6" in="0" out="74">
+  <property name="length">125</property>
+  <property name="eof">pause</property>
+  <property name="resource"/>
+  <property name="progressive">1</property>
+  <property name="aspect_ratio">1</property>
+  <property name="seekable">1</property>
+  <property name="mlt_service">kdenlivetitle</property>
+  <property name="kdenlive:clipname">dzięki</property>
+  <property name="kdenlive:folderid">-1</property>
+  <property name="xmldata">&lt;kdenlivetitle duration="75" LC_NUMERIC="pl_PL.UTF-8" width="1920" height="1080" out="75">
+ &lt;item type="QGraphicsTextItem" z-index="2">
+  &lt;position x="261" y="470">
+   &lt;transform>1,0,0,0,1,0,0,0,1&lt;/transform>
+  &lt;/position>
+  &lt;content line-spacing="0" shadow="0;#64000000;3;3;3" font-underline="0" box-height="218" font-outline-color="0,0,0,255" font="Noto Sans" letter-spacing="0" font-pixel-size="80" font-italic="0" alignment="4" font-weight="50" font-outline="1" box-width="1406.52" font-color="255,85,0,255">Dzięki za obejrzenie!
+W opisie wyjaśniamy jak to zrobiliśmy&lt;/content>
+ &lt;/item>
+ &lt;startviewport rect="0,0,1920,1080"/>
+ &lt;endviewport rect="0,0,1920,1080"/>
+ &lt;background color="0,0,0,0"/>
+&lt;/kdenlivetitle>
+</property>
+  <property name="kdenlive:duration">75</property>
+  <property name="force_reload">0</property>
+  <property name="global_feed">1</property>
+  <property name="meta.media.width">1920</property>
+  <property name="meta.media.height">1080</property>
+ </producer>
+ <producer id="8" in="0" out="124">
+  <property name="length">125</property>
+  <property name="eof">pause</property>
+  <property name="resource">/home/romek/Wideo/Screenshot_2020-05-16-14-13-43-807_com.example.madkomatapp.jpg</property>
+  <property name="ttl">25</property>
+  <property name="aspect_ratio">1</property>
+  <property name="progressive">1</property>
+  <property name="seekable">1</property>
+  <property name="meta.media.width">2160</property>
+  <property name="meta.media.height">1080</property>
+  <property name="mlt_service">qimage</property>
+  <property name="kdenlive:duration">125</property>
+  <property name="kdenlive:file_size">1209764</property>
+  <property name="kdenlive:file_hash">cea7ecc3d660349df48a54e4a6dbb83f</property>
+ </producer>
+ <producer id="9" in="0" out="124">
+  <property name="length">125</property>
+  <property name="eof">pause</property>
+  <property name="resource">/home/romek/Wideo/Screenshot_2020-05-16-20-30-57-175_com.example.madkomatapp.jpg</property>
+  <property name="ttl">25</property>
+  <property name="aspect_ratio">1</property>
+  <property name="progressive">1</property>
+  <property name="seekable">1</property>
+  <property name="meta.media.width">2160</property>
+  <property name="meta.media.height">1080</property>
+  <property name="mlt_service">qimage</property>
+  <property name="kdenlive:duration">125</property>
+  <property name="kdenlive:file_size">228206</property>
+  <property name="kdenlive:file_hash">98200e9e84b96a475be623d58245c8e4</property>
+ </producer>
+ <producer id="10" in="0" out="74">
+  <property name="length">125</property>
+  <property name="eof">pause</property>
+  <property name="resource"/>
+  <property name="progressive">1</property>
+  <property name="aspect_ratio">1</property>
+  <property name="seekable">1</property>
+  <property name="mlt_service">kdenlivetitle</property>
+  <property name="kdenlive:clipname">tylko ładnie</property>
+  <property name="kdenlive:folderid">-1</property>
+  <property name="xmldata">&lt;kdenlivetitle duration="75" LC_NUMERIC="pl_PL.UTF-8" width="1920" height="1080" out="75">
+ &lt;item type="QGraphicsTextItem" z-index="1">
+  &lt;position x="303" y="440">
+   &lt;transform>1,0,0,0,1,0,0,0,1&lt;/transform>
+  &lt;/position>
+  &lt;content line-spacing="0" shadow="0;#64000000;3;3;3" font-underline="0" box-height="218" font-outline-color="0,0,0,255" font="Noto Sans" letter-spacing="0" font-pixel-size="80" font-italic="0" alignment="4" font-weight="50" font-outline="1" box-width="1329.23" font-color="255,85,0,255">Tylko ładnie uśmiechnięte dzieci są 
+nagradzane&lt;/content>
+ &lt;/item>
+ &lt;startviewport rect="0,0,1920,1080"/>
+ &lt;endviewport rect="0,0,1920,1080"/>
+ &lt;background color="0,0,0,0"/>
+&lt;/kdenlivetitle>
+</property>
+  <property name="kdenlive:duration">75</property>
+  <property name="force_reload">0</property>
+  <property name="global_feed">1</property>
+  <property name="meta.media.width">1920</property>
+  <property name="meta.media.height">1080</property>
  </producer>
  <playlist id="main bin">
   <property name="kdenlive:docproperties.audiotargettrack">2</property>
@@ -240,7 +329,7 @@ urzeczywistnić pewnego mema...&lt;/content>
   <property name="kdenlive:docproperties.generateimageproxy">0</property>
   <property name="kdenlive:docproperties.generateproxy">0</property>
   <property name="kdenlive:docproperties.kdenliveversion">18.12.3</property>
-  <property name="kdenlive:docproperties.position">1011</property>
+  <property name="kdenlive:docproperties.position">0</property>
   <property name="kdenlive:docproperties.previewchunks"/>
   <property name="kdenlive:docproperties.previewextension"/>
   <property name="kdenlive:docproperties.previewparameters"/>
@@ -256,16 +345,7 @@ urzeczywistnić pewnego mema...&lt;/content>
   <property name="kdenlive:docproperties.zoneout">1668</property>
   <property name="kdenlive:docproperties.zoom">7</property>
   <property name="kdenlive:documentnotes"/>
-  <property name="kdenlive:clipgroups">&lt;groups>
- &lt;group>
-  &lt;clipitem position="325" track="3"/>
-  &lt;clipitem position="75" track="5"/>
-  &lt;clipitem position="200" track="5"/>
-  &lt;clipitem position="437" track="4"/>
-  &lt;clipitem position="325" track="2"/>
- &lt;/group>
-&lt;/groups>
-</property>
+  <property name="kdenlive:clipgroups"/>
   <property name="kdenlive:docproperties.renderaudioquality">160</property>
   <property name="kdenlive:docproperties.rendercategory">Generic (HD for web, mobile devices...)</property>
   <property name="kdenlive:docproperties.renderendguide">-1</property>
@@ -292,7 +372,11 @@ urzeczywistnić pewnego mema...&lt;/content>
   <entry producer="3" in="0" out="1292"/>
   <entry producer="4" in="0" out="124"/>
   <entry producer="5" in="0" out="124"/>
-  <entry producer="6" in="0" out="124"/>
+  <entry producer="7" in="0" out="124"/>
+  <entry producer="6" in="0" out="74"/>
+  <entry producer="8" in="0" out="124"/>
+  <entry producer="9" in="0" out="124"/>
+  <entry producer="10" in="0" out="74"/>
  </playlist>
  <producer id="black" in="0" out="500">
   <property name="length">15000</property>
@@ -303,7 +387,7 @@ urzeczywistnić pewnego mema...&lt;/content>
   <property name="set.test_audio">0</property>
  </producer>
  <playlist id="black_track">
-  <entry producer="black" in="0" out="1620"/>
+  <entry producer="black" in="0" out="1984"/>
  </playlist>
  <playlist id="playlist1">
   <property name="kdenlive:audio_track">1</property>
@@ -312,7 +396,7 @@ urzeczywistnić pewnego mema...&lt;/content>
  <producer title="Anonymous Submission" id="2_playlist2_audio" in="0" out="2080">
   <property name="length">00:01:23:06</property>
   <property name="eof">pause</property>
-  <property name="resource">dobre_xiaomi.mp4</property>
+  <property name="resource">/home/romek/Wideo/dobre_xiaomi.mp4</property>
   <property name="audio_index">1</property>
   <property name="video_index">-1</property>
   <property name="mute_on_pause">1</property>
@@ -372,7 +456,7 @@ urzeczywistnić pewnego mema...&lt;/content>
  <producer title="Stabilizowany" id="3_playlist3" in="0" out="1292">
   <property name="length">00:00:51:18</property>
   <property name="eof">pause</property>
-  <property name="resource">dobre_front.mp4.mlt</property>
+  <property name="resource">/home/romek/Wideo/dobre_front.mp4.mlt</property>
   <property name="mlt_service">xml</property>
   <property name="global_feed">1</property>
   <property name="xml">was here</property>
@@ -389,7 +473,7 @@ urzeczywistnić pewnego mema...&lt;/content>
  <producer title="Anonymous Submission" id="2_video" in="0" out="2080">
   <property name="length">00:01:23:06</property>
   <property name="eof">pause</property>
-  <property name="resource">dobre_xiaomi.mp4</property>
+  <property name="resource">/home/romek/Wideo/dobre_xiaomi.mp4</property>
   <property name="audio_index">-1</property>
   <property name="video_index">0</property>
   <property name="mute_on_pause">1</property>
@@ -474,7 +558,7 @@ urzeczywistnić pewnego mema...&lt;/content>
  <producer title="Anonymous Submission" id="4_playlist5" in="0" out="124">
   <property name="length">125</property>
   <property name="eof">loop</property>
-  <property name="resource">madkomat</property>
+  <property name="resource">/home/romek/Wideo/madkomat</property>
   <property name="audio_index">-1</property>
   <property name="video_index">0</property>
   <property name="mute_on_pause">1</property>
@@ -514,10 +598,15 @@ urzeczywistnić pewnego mema...&lt;/content>
  <playlist id="playlist5">
   <property name="kdenlive:track_name">Obraz 3</property>
   <entry producer="5" in="0" out="74"/>
-  <entry producer="6" in="0" out="124"/>
+  <entry producer="7" in="0" out="124"/>
   <entry producer="4_playlist5" in="0" out="124"/>
+  <blank length="1293"/>
+  <entry producer="10" in="0" out="74"/>
+  <entry producer="8" in="0" out="124"/>
+  <entry producer="9" in="0" out="90"/>
+  <entry producer="6" in="0" out="74"/>
  </playlist>
- <tractor title="Anonymous Submission" id="maintractor" global_feed="1" in="0" out="1620">
+ <tractor title="Anonymous Submission" id="maintractor" global_feed="1" in="0" out="1984">
   <track producer="black_track"/>
   <track hide="video" producer="playlist1"/>
   <track hide="video" producer="playlist2"/>
