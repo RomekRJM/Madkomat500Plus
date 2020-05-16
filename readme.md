@@ -33,5 +33,5 @@ Have a look at the following diagram:
 7. If we find a smiling baby we send a message over Bluetooth to Madkomat. There we have a small leJOS app that receives it, opens the hatch, hands over a banknote to the user and closes the hatch.
 
 ## Thanks go to
-- Author of the meme for inspiration!
+- https://www.facebook.com/pg/tymczasem.rysunki - author of the meme for inspiration!
 - Creators of http://www.lejos.org/ library - I love your work!
